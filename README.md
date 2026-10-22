@@ -98,3 +98,9 @@ python -m bot.run
 ---
 
 **Skill map:** Python (aiogram 3 / pytest) · Frontend SPA (GitHub Pages) · REST / GitHub API · Базы знаний и NLU · Асинхронные сервисы · Продающие тексты
+
+## Скриншоты
+
+| | |
+|---|---|
+| ![Витрина](.assets/screens/01.png) | ![Каталог](.assets/screens/02.png) |
