@@ -1,78 +1,91 @@
 <!DOCTYPE html>
-<html lang="ru" class="scroll-smooth">
+<html lang="ru">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Call Center — голосовой ИИ-оператор · витрина проекта</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script>
-tailwind.config={theme:{extend:{colors:{ink:'#0b0b14',neon:'#7c5cff',mint:'#3bf0c2',gold:'#ffc86b'},
-fontFamily:{sans:['Inter','ui-sans-serif','system-ui']},boxShadow:{glow:'0 0 40px rgba(124,92,255,.35)'}}}}
-</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Call Center — голосовой ИИ-оператор · витрина</title>
+<meta name="description" content="ИИ-оператор, который звонит первым: XTTS v2, Whisper turbo, воронка звонка, база сессий. Витрина проекта — код закрыт.">
+<meta property="og:title" content="AI Call Center — голосовой ИИ-оператор">
+<meta property="og:description" content="Говорит голосом, слышит клиента, ведёт по воронке звонка.">
+<meta name="theme-color" content="#0e0f13">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e0f13'/%3E%3Ctext x='32' y='44' font-family='Georgia' font-size='34' fill='%23e0b060' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
 <style>
-body{background:radial-gradient(900px 500px at 80% -10%,#241a5e66,transparent),#0b0b14}
-.glass{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(12px)}
-.lift{transition:transform .25s ease, box-shadow .25s ease}.lift:hover{transform:translateY(-6px);box-shadow:0 16px 60px rgba(124,92,255,.25)}
-.fade-up{animation:fu .7s ease both}@keyframes fu{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-.grad-txt{background:linear-gradient(92deg,#7c5cff,#3bf0c2 60%,#ffc86b);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root{--bg:#0e0f13;--card:#171a22;--line:#ffffff14;--tx:#eceae4;--mut:#9a978f;--gold:#e0b060;--gold2:#f3d49a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font:16px/1.6 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+a{color:inherit;text-decoration:none}
+.back{display:inline-block;margin:28px 0 0;color:var(--mut);font-size:14px}
+.back:hover{color:#fff}
+.kick{display:inline-flex;align-items:center;gap:9px;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);border:1px solid #e0b06033;border-radius:100px;padding:10px 22px}
+.kick i{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pu 1.6s infinite;font-style:normal}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
+header.hero{text-align:center;padding:66px 0 56px}
+h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(34px,5.5vw,58px);line-height:1.15;margin-top:30px}
+h1 em{font-style:italic;color:var(--gold)}
+.lead{max-width:640px;margin:24px auto 0;color:var(--mut);font-size:17.5px}
+.shot{width:100%;border-radius:22px;border:1px solid var(--line);display:block;margin-top:44px}
+.cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:34px}
+.btn-p{background:var(--gold);color:#141310;font-weight:600;border-radius:12px;padding:15px 30px;font-size:15px}
+.btn-p:hover{background:var(--gold2)}
+.btn-s{border:1px solid var(--line);border-radius:12px;padding:15px 30px;font-size:15px}
+.btn-s:hover{border-color:#ffffff40}
+section{padding:64px 0;border-top:1px solid var(--line)}
+h2{font-family:Georgia,serif;font-weight:500;font-size:30px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.grid article{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px}
+.grid .ic{font-size:30px}
+.grid h3{font-family:Georgia,serif;font-weight:500;font-size:19px;margin-top:14px}
+.grid p{color:var(--mut);font-size:14px;margin-top:10px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.stack{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:36px}
+.stack span{border:1px solid var(--line);border-radius:100px;padding:9px 18px;font-size:13.5px;color:#c9c5bc;background:var(--card)}
+.foot{text-align:center;color:var(--mut);font-size:13px;padding:34px 0 56px}
+.clos{max-width:560px;margin:16px auto 0;text-align:center;font-size:12.5px;color:var(--mut)}
 </style>
 </head>
-<body class="text-zinc-200 font-sans antialiased">
+<body>
+<div class="wrap">
+  <a class="back" href="/">← вернуться в магазин</a>
+</div>
 
-<header class="max-w-6xl mx-auto px-5 pt-16 pb-10">
-  <a href="/" class="text-sm text-zinc-500 hover:text-white transition">← вернуться в магазин</a>
+<header class="hero wrap">
+  <div class="kick"><i></i> проект продаётся в магазине · код закрыт</div>
+  <h1>ИИ-оператор, который<br><em>говорит первым</em></h1>
+  <p class="lead">Он не бот с кнопками в чате. Он звонит по сценарию, слышит собеседника через Whisper, отвечает голосом XTTS и ведёт диалог к цели — пока вы занимаетесь делом.</p>
+  <img class="shot" src="/img/tts-hero.svg" alt="AI Call Center: голос ↔ слух ↔ воронка">
+  <div class="cta">
+    <a class="btn-p" href="https://t.me/NexusDvBot?start=consult-tts">💬 Купить · внедрение</a>
+    <a class="btn-s" href="/">🛍 Весь каталог</a>
+  </div>
 </header>
 
-<section class="max-w-6xl mx-auto px-5 text-center">
-  <div class="inline-flex items-center gap-2 text-xs text-gold border border-gold/30 rounded-full px-4 py-1.5 mb-7 fade-up">
-    <span class="w-2 h-2 rounded-full bg-gold animate-pulse"></span> проект продаётся в магазине · код закрыт
-  </div>
-  <h1 class="text-4xl md:text-6xl font-extrabold leading-tight fade-up">ИИ-оператор, который<br><span class="grad-txt">говорит первым</span></h1>
-  <p class="mt-6 text-zinc-400 max-w-2xl mx-auto text-lg fade-up">Он не «бот с кнопками в чате». Он звонит по сценарию, слышит собеседника через Whisper, отвечает голосом XTTS и ведёт диалог к цели — пока ты занимаешься делом.</p>
-</section>
-
-<section class="max-w-5xl mx-auto px-5 mt-10 fade-up">
-  <img src="/img/tts-hero.svg" alt="AI Call Center: голос ↔ слух ↔ воронка" class="w-full rounded-3xl border border-white/10 shadow-glow">
-</section>
-
-<section class="max-w-6xl mx-auto px-5 py-14">
-  <h2 class="text-3xl font-bold text-center">Что внутри</h2>
-  <div class="mt-10 grid md:grid-cols-3 gap-6">
-    <div class="glass rounded-2xl p-6 lift fade-up"><div class="text-3xl">🗣️</div><h3 class="mt-3 font-bold">Живой голос (TTS)</h3><p class="mt-2 text-sm text-zinc-400">Coqui XTTS v2: синтез с клонированием тембра по 6-секундному образцу WAV. Реплики генерируются на лету, работая на CUDA-ускорении.</p></div>
-    <div class="glass rounded-2xl p-6 lift fade-up"><div class="text-3xl">🎧</div><h3 class="mt-3 font-bold">Слух (STT + VAD)</h3><p class="mt-2 text-sm text-zinc-400">faster-whisper turbo распознаёт живую речь клиента; детектор тишины и фоновый шум — не ломает сценарий, а возвращает его на нужный шаг.</p></div>
-    <div class="glass rounded-2xl p-6 lift fade-up"><div class="text-3xl">📈</div><h3 class="mt-3 font-bold">Воронка звонка</h3><p class="mt-2 text-sm text-zinc-400">Сценарий загружается из .txt: шаги, ключевые слова, fallback. Импорт 10-секундно — меняешь скрипт, не трогая код.</p></div>
-    <div class="glass rounded-2xl p-6 lift fade-up"><div class="text-3xl">💾</div><h3 class="mt-3 font-bold">База звонков</h3><p class="mt-2 text-sm text-zinc-400">SQLite: сессии, реплики, вердикты. Записи WAV сохраняются для разбор разговоров и обучения скриптов.</p></div>
-    <div class="glass rounded-2xl p-6 lift fade-up"><div class="text-3xl">📦</div><h3 class="mt-3 font-bold">Портативный агент</h3><p class="mt-2 text-sm text-zinc-400">Экспорт .agent.json одним файлом: сценарий + голосовой образец + настройки. Перенос на другую машину за минуту.</p></div>
-    <div class="glass rounded-2xl p-6 lift fade-up"><div class="text-3xl">🖥️</div><h3 class="mt-3 font-bold">Панель оператора</h3><p class="mt-2 text-sm text-zinc-400">Gradio-интерфейс: воронка, диалог, тесты голоса, экспорт. Запуск одной кнопкой на своём GPU.</p></div>
+<section>
+  <div class="wrap">
+    <h2>Что внутри</h2>
+    <div class="grid">
+      <article><div class="ic">🗣️</div><h3>Живой голос (TTS)</h3><p>Coqui XTTS v2: синтез с клонированием тембра по 6-секундному образцу WAV. Реплики генерируются на лету на CUDA-ускорении.</p></article>
+      <article><div class="ic">🎧</div><h3>Слух (STT + VAD)</h3><p>faster-whisper turbo распознаёт живую речь клиента. Детектор тишины: фоновый шум не ломает сценарий, а возвращает его на нужный шаг.</p></article>
+      <article><div class="ic">📈</div><h3>Воронка звонка</h3><p>Сценарий загружается из .txt: шаги, ключевые слова, fallback. Меняете скрипт — не трогая код.</p></article>
+      <article><div class="ic">💾</div><h3>База звонков</h3><p>SQLite: сессии, реплики, вердикты. Записи WAV сохраняются для разбора разговоров и обучения скриптов.</p></article>
+      <article><div class="ic">📦</div><h3>Портативный агент</h3><p>Экспорт .agent.json одним файлом: сценарий + голосовой образец + настройки. Перенос на другую машину за минуту.</p></article>
+      <article><div class="ic">🖥️</div><h3>Панель оператора</h3><p>Gradio-интерфейс: воронка, диалог, тесты голоса, экспорт. Запуск одной кнопкой на своём GPU (CUDA 12, RTX 4060+).</p></article>
+    </div>
   </div>
 </section>
 
-<section class="max-w-5xl mx-auto px-5 pb-14 fade-up">
-  <img src="/img/tts-flow.svg" alt="Схема работы воронки звонка" class="w-full rounded-3xl border border-white/10">
-  <p class="text-xs text-zinc-500 mt-3 text-center">Место под реальные скриншоты твоей сборки — просто замени img/tts-flow.svg и tts-hero.svg</p>
-</section>
-
-<section class="max-w-6xl mx-auto px-5 py-10">
-  <h2 class="text-3xl font-bold text-center">Стек</h2>
-  <div class="mt-8 flex flex-wrap justify-center gap-3">
-    <span class="glass px-4 py-2 rounded-xl text-sm">Python 3.11</span>
-    <span class="glass px-4 py-2 rounded-xl text-sm">PyTorch 2.5 + CUDA</span>
-    <span class="glass px-4 py-2 rounded-xl text-sm">Coqui XTTS v2</span>
-    <span class="glass px-4 py-2 rounded-xl text-sm">faster-whisper (turbo)</span>
-    <span class="glass px-4 py-2 rounded-xl text-sm">Gradio 5</span>
-    <span class="glass px-4 py-2 rounded-xl text-sm">SQLite + WAV-экспорт</span>
-    <span class="glass px-4 py-2 rounded-xl text-sm">numpy / librosa / pydub</span>
+<section>
+  <div class="wrap">
+    <img class="shot" src="/img/tts-flow.svg" alt="Схема воронки звонка">
+    <h2 style="margin-top:56px">Стек</h2>
+    <div class="stack">
+      <span>Python 3.11</span><span>PyTorch 2.5 + CUDA 12</span><span>Coqui XTTS v2</span>
+      <span>faster-whisper turbo</span><span>Silero VAD</span><span>SQLite</span><span>Gradio</span><span>.agent.json</span>
+    </div>
+    <p class="clos">Код проекта закрыт — витрина показывает архитектуру и возможности. Живой демонстрационный звонок показывается на созвоне перед оплатой.</p>
   </div>
 </section>
 
-<section class="max-w-3xl mx-auto px-5 py-14 text-center">
-  <h2 class="text-3xl font-bold">Как купить</h2>
-  <p class="mt-4 text-zinc-400">Проект продаётся в магазине: выбери, собери корзину, оплати в Telegram-боте. Голос под ваш скрипт, сценарий под ваш бизнес.</p>
-  <a href="/#shop" class="inline-block mt-7 px-7 py-3.5 rounded-xl bg-gradient-to-r from-neon to-[#5e3fff] font-semibold text-white shadow-glow hover:brightness-110 transition">🎙 Купить в магазине · 29 900 ₽</a>
-</section>
-
-<footer class="text-center py-10 text-sm text-zinc-500">
-  <a href="/" class="hover:text-white transition">AutoShop Portfolio</a> · AI Call Center — витрина проекта
-</footer>
+<div class="foot">AI Call Center · входит в AutoShop · <a href="/" style="color:var(--gold)">магазин</a></div>
 </body>
 </html>

@@ -42,11 +42,25 @@
 ```bash
 git clone https://github.com/nwl01234/portfolio-app
 cd portfolio-app
-pip install -r requirements.txt
-copy .env.example .env        # вписать BOT_TOKEN и GITHUB_TOKEN
-python -m bot.run             # бот: polling, никакого публичного URL не нужно
-python -m http.server 8080    # локальный предпросмотр сайта (рил: развёрнуто Pages)
-python -m pytest tests -q     # тесты ядра
+
+# 1. Виртуальное окружение (обязательный шаг)
+python -m venv .venv
+.venv\Scripts\activate            # Windows  |  Linux/macOS: source .venv/bin/activate
+python -m pip install -r requirements.txt
+
+# 2. Секреты
+copy .env.example .env            # вписать BOT_TOKEN и GITHUB_TOKEN
+
+# 3. Бот: polling, никакого публичного URL не нужно
+#    при старте бот пишет data/bot_status.json online — сайт сразу показывает «Бот на связи»
+#    при остановке (Ctrl+C) — offline, «Бот сейчас офлайн»
+python -m bot.run
+
+# 4. Локальный предпросмотр сайта (на GitHub Pages он уже развёрнут)
+.venv\Scripts\python.exe -m http.server 8080
+
+# 5. Тесты ядра
+.venv\Scripts\python.exe -m pytest tests -q
 ```
 
 ### Деплой сайта (GitHub Pages)

@@ -97,6 +97,39 @@ def _b64(text: str) -> str:
     return base64.b64encode(text.encode()).decode()
 
 
+def put_file(rel_path: str, text: str, message: str) -> str:
+    """Универсальная публикация файла в репо сайта (commit → Pages сам перестроится)."""
+    if not config.GITHUB_TOKEN:
+        return "local"
+    try:
+        with httpx.Client(timeout=20) as c:
+            r = c.get(f"{API}/repos/{config.GITHUB_REPO}/contents/{rel_path}", headers=_gh())
+            sha = r.json().get("sha") if r.status_code == 200 else None
+            body = {"message": message, "content": _b64(text)}
+            if sha:
+                body["sha"] = sha
+            r = c.put(f"{API}/repos/{config.GITHUB_REPO}/contents/{rel_path}", headers=_gh(), json=body)
+            r.raise_for_status()
+        return "github"
+    except Exception as e:
+        print(f"[put:{rel_path}] fallback local: {e.__class__.__name__}")
+        return "local"
+
+
+STATUS_PATH = config.DATA_DIR / "bot_status.json"
+
+
+def set_bot_status(online: bool) -> str:
+    """Сайт читает data/bot_status.json и показывает баннер «бот на связи / офлайн»."""
+    doc = {"online": bool(online),
+           "ts": datetime.now().isoformat(timespec="seconds")}
+    if not config.GITHUB_TOKEN:
+        STATUS_PATH.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+        return "local"
+    return put_file("data/bot_status.json", json.dumps(doc, ensure_ascii=False),
+                    "shop: bot " + ("online" if online else "offline"))
+
+
 # ---------- продажи (log «кто · что · когда») ----------
 
 def log_sale(uid: int, tag: str, pid: str, qty: int, source: str) -> None:

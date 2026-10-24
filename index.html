@@ -1,196 +1,382 @@
 <!DOCTYPE html>
-<html lang="ru" class="scroll-smooth">
+<html lang="ru">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AutoShop Portfolio — магазин с живыми ИИ-проектами</title>
-<meta name="description" content="Автономный магазин-портфолио: Telegram-бот, CRM для отдела продаж, голосовой ИИ-оператор. Товары — реальные работающие проекты, демо запускается из магазина.">
-<script src="https://cdn.tailwindcss.com"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script>
-tailwind.config = { theme: { extend: {
-  colors: { ink:'#0b0b14', card:'#12121f', neon:'#7c5cff', mint:'#3bf0c2', gold:'#ffc86b' },
-  fontFamily: { sans:['Inter','ui-sans-serif','system-ui'], mono:['JetBrains Mono','monospace'] },
-  boxShadow: { glow:'0 0 40px rgba(124,92,255,.35)' },
-}}}
-</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoShop — магазин работающих ИИ-проектов</title>
+<meta name="description" content="Не презентации, а работающий софт: CRM для отдела продаж, голосовой ИИ-оператор, Telegram-боты. Выберите проект — Telegram-бот доведёт до оплаты сам.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AutoShop — магазин работающих ИИ-проектов">
+<meta property="og:description" content="CRM, голосовой ИИ-оператор, боты. Оплата и выдача — автоматом через Telegram.">
+<meta property="og:image" content="/img/og-card.png">
+<meta name="theme-color" content="#0e0f13">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e0f13'/%3E%3Ctext x='32' y='44' font-family='Georgia' font-size='34' fill='%23e0b060' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
 <style>
-  body{background:radial-gradient(1000px 500px at 80% -10%, #241a5e66, transparent),radial-gradient(800px 400px at -10% 30%, #0d3b3e55, transparent), #0b0b14;}
-  .grad-txt{background:linear-gradient(92deg,#7c5cff,#3bf0c2 60%,#ffc86b);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .glass{background:rgba(255,255,255,.045);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.09)}
-  .lift{transition:transform .25s ease, box-shadow .25s ease}
-  .lift:hover{transform:translateY(-6px);box-shadow:0 16px 60px rgba(124,92,255,.25)}
-  .fade-up{animation:fu .7s ease both}@keyframes fu{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-  .pulse{animation:pd 1.8s infinite}@keyframes pd{0%,100%{opacity:1}50%{opacity:.35}}
-  [x-cloak]{display:none!important}
+:root{
+  --bg:#0e0f13; --bg2:#13151b; --card:#171a22; --line:#ffffff14;
+  --tx:#eceae4; --mut:#9a978f; --gold:#e0b060; --gold2:#f3d49a; --grn:#6fd6a0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font:16px/1.6 "Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+a{color:inherit;text-decoration:none}
+.ser{font-family:Georgia,"Times New Roman",serif}
+
+/* ---------- nav ---------- */
+nav{position:sticky;top:0;z-index:50;background:rgba(14,15,19,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1080px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:10px;font-size:20px}
+.brand b{font-family:Georgia,serif;font-weight:600;letter-spacing:.5px}
+.brand span{font-size:11px;color:var(--mut);letter-spacing:2.5px;text-transform:uppercase}
+.nav-r{display:flex;align-items:center;gap:22px}
+.nav-l{display:flex;gap:22px;font-size:14px;color:var(--mut)}
+.nav-l a:hover{color:var(--tx)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px}
+.dot.on{background:var(--grn);box-shadow:0 0 10px var(--grn);animation:pu 1.6s infinite}
+.dot.off{background:#c8a24e}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
+#stnav{font-size:13px;color:var(--mut)}
+.cart-btn{position:relative;background:var(--gold);color:#141310;border:0;border-radius:10px;padding:9px 18px;font-weight:600;font-size:14px;cursor:pointer}
+.cart-btn:hover{background:var(--gold2)}
+.nbadge{position:absolute;top:-7px;right:-7px;background:#d75445;color:#fff;font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:10px;display:none;align-items:center;justify-content:center;padding:0 5px}
+@media(max-width:760px){.nav-l{display:none}}
+
+/* ---------- status banner ---------- */
+#banner{max-width:1080px;margin:26px auto 0;border-radius:16px;padding:15px 20px;display:flex;gap:14px;align-items:center;font-size:14.5px;border:1px solid}
+#banner.on{background:linear-gradient(90deg,#12241b,#101720);border-color:#6fd6a044;color:#cfecdd}
+#banner.off{background:linear-gradient(90deg,#2a2115,#17161a);border-color:#c8a24e44;color:#ecdfc8}
+#banner b{color:#fff}
+#banner .x{margin-left:auto;color:var(--mut);cursor:pointer;font-size:18px;background:none;border:0}
+#banner[hidden]{display:none}
+
+/* ---------- hero ---------- */
+header{padding:84px 0 70px;text-align:center}
+.kick{display:inline-block;font-size:12px;letter-spacing:3.5px;text-transform:uppercase;color:var(--gold);border:1px solid #e0b06033;border-radius:100px;padding:10px 22px;margin-bottom:34px}
+h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(38px,6vw,64px);line-height:1.13;letter-spacing:-.5px}
+h1 em{font-style:italic;color:var(--gold)}
+.lead{max-width:640px;margin:26px auto 0;color:var(--mut);font-size:18px}
+.cta{margin-top:38px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-p{background:var(--gold);color:#141310;font-weight:600;border-radius:12px;padding:15px 30px;font-size:15px;display:inline-block}
+.btn-p:hover{background:var(--gold2)}
+.btn-s{border:1px solid var(--line);border-radius:12px;padding:15px 30px;font-size:15px;color:var(--tx);display:inline-block}
+.btn-s:hover{border-color:#ffffff40;background:#ffffff08}
+.stats{margin-top:64px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.stats div{background:var(--bg);padding:26px 12px}
+.stats b{display:block;font-family:Georgia,serif;font-size:30px;font-weight:500;color:var(--gold)}
+.stats span{font-size:13px;color:var(--mut)}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ---------- sections ---------- */
+section{padding:74px 0;border-top:1px solid var(--line)}
+h2{font-family:Georgia,serif;font-weight:500;font-size:32px}
+.sub{color:var(--mut);margin-top:12px;max-width:640px}
+
+/* featured */
+.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+.feat article{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;transition:.25s}
+.feat article:hover{transform:translateY(-5px);border-color:#e0b06055}
+.feat .ic{font-size:34px}
+.feat h3{font-family:Georgia,serif;font-weight:500;font-size:21px;margin-top:16px}
+.feat p{color:var(--mut);font-size:14.5px;margin-top:10px;flex-grow:1}
+.feat img{margin-top:18px;border-radius:12px;border:1px solid var(--line);width:100%}
+.feat .row{display:flex;gap:10px;margin-top:20px}
+.feat .row a{flex:1;text-align:center;padding:12px 4px;border-radius:11px;font-size:13.5px;font-weight:600}
+.demo-a{background:#e0b0601f;border:1px solid #e0b06066;color:var(--gold2)}
+.demo-a:hover{background:#e0b06033}
+.buy-a{background:var(--gold);color:#141310}
+.buy-a:hover{background:var(--gold2)}
+@media(max-width:880px){.feat{grid-template-columns:1fr}}
+
+/* catalog */
+#catalog-list{margin-top:36px;display:flex;flex-direction:column;gap:14px}
+.crow{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 26px;display:flex;align-items:center;gap:22px;transition:.2s}
+.crow:hover{border-color:#ffffff2a}
+.crow .e{font-size:30px;width:44px;text-align:center;flex-shrink:0}
+.crow .mid{flex-grow:1;min-width:0}
+.crow h3{font-size:17px;font-weight:600}
+.crow .tg{color:var(--mut);font-size:13.5px;margin-top:3px}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.tags i{font-style:normal;font-size:11px;color:#c9c5bc;border:1px solid var(--line);border-radius:7px;padding:3px 9px;white-space:nowrap}
+.crow .r{text-align:right;flex-shrink:0}
+.price{font-family:Georgia,serif;font-size:21px;color:var(--gold)}
+.unit{font-size:12px;color:var(--mut)}
+.qty-chip{display:inline-block;font-size:12px;color:var(--grn);margin-top:4px}
+.qty-chip.zero{color:#d76b5d}
+.crow button{margin-top:10px;background:var(--gold);color:#141310;border:0;border-radius:10px;padding:10px 22px;font-weight:600;font-size:13.5px;cursor:pointer}
+.crow button:hover{background:var(--gold2)}
+.crow button:disabled{opacity:.25;cursor:not-allowed}
+@media(max-width:760px){.crow{flex-wrap:wrap}.crow .r{text-align:left;width:100%;display:flex;align-items:center;gap:14px}}
+
+/* how */
+.how{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:36px}
+.how div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;font-size:13.5px;color:var(--mut)}
+.how b{display:block;font-family:Georgia,serif;color:var(--gold);font-size:15px;margin-bottom:8px;font-weight:600}
+@media(max-width:880px){.how{grid-template-columns:1fr 1fr}}
+
+/* cart drawer */
+#ovl{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:none}
+#ovl.show{display:block}
+#drawer{position:fixed;top:0;right:-430px;width:min(410px,100%);height:100%;background:var(--bg2);z-index:99;transition:right .3s ease;display:flex;flex-direction:column;border-left:1px solid var(--line)}
+#drawer.show{right:0}
+.dr-h{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.dr-h b{font-family:Georgia,serif;font-size:19px}
+.dr-h button{background:none;border:0;color:var(--mut);font-size:26px;cursor:pointer;line-height:1}
+.dr-b{flex:1;overflow-y:auto;padding:18px 20px}
+.ci{border:1px solid var(--line);border-radius:13px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.ci .n{flex-grow:1;font-size:14px;font-weight:600}
+.ci .p{color:var(--mut);font-size:12.5px;margin-top:2px}
+.qbtn{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:none;color:var(--tx);font-size:16px;cursor:pointer}
+.qbtn:hover{background:#ffffff10}
+.qv{width:26px;text-align:center;font-weight:700}
+.dr-f{padding:18px 24px;border-top:1px solid var(--line)}
+.dr-t{display:flex;justify-content:space-between;font-size:18px;font-weight:700;margin-bottom:14px}
+.ck{display:block;width:100%;text-align:center;background:var(--gold);color:#141310;border:0;border-radius:12px;padding:15px;font-weight:700;font-size:15px;cursor:pointer}
+.ck:hover{background:var(--gold2)}
+.warn{margin-top:12px;font-size:12px;color:#c8a24e;border:1px solid #c8a24e44;border-radius:10px;padding:10px 12px;display:none}
+.warn.show{display:block}
+.empty{color:var(--mut);text-align:center;padding:60px 0}
+.empty a{color:var(--gold);text-decoration:underline}
+
+footer{padding:56px 0 72px;text-align:center;color:var(--mut);font-size:14px;border-top:1px solid var(--line);margin-top:20px}
+footer a{color:var(--gold)}
 </style>
 </head>
-<body class="text-zinc-200 font-sans antialiased" x-data="shop()" x-init="init()">
+<body>
 
-<nav class="sticky top-0 z-40 glass">
-  <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-    <a href="#top" class="font-bold text-lg tracking-tight">Auto<span class="grad-txt">Shop</span> <span class="text-xs text-zinc-500 ml-1">portfolio</span></a>
-    <div class="hidden md:flex gap-7 text-sm text-zinc-400">
-      <a href="#projects" class="hover:text-white transition">Проекты</a>
-      <a href="#shop" class="hover:text-white transition">Магазин</a>
-      <a href="#how" class="hover:text-white transition">Как работает</a>
+<nav>
+  <div class="nav-in">
+    <a class="brand" href="/"><b>AutoShop</b><span>portfolio</span></a>
+    <div class="nav-l">
+      <a href="#projects">Проекты</a>
+      <a href="#shop">Магазин</a>
+      <a href="#how">Как работает</a>
+      <a href="/tts.html">AI Call Center</a>
     </div>
-    <button @click="openCart()" class="relative px-4 py-2 rounded-xl bg-neon/20 border border-neon/40 text-sm hover:bg-neon/30 transition">
-      🛒 Корзина
-      <span x-show="count()" x-cloak x-text="count()" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-mint text-ink text-[11px] font-bold grid place-items-center"></span>
-    </button>
+    <div class="nav-r">
+      <span id="stnav"><span class="dot"></span>статус бота…</span>
+      <button class="cart-btn" onclick="openCart()">🛒 Корзина<span class="nbadge" id="nbadge">0</span></button>
+    </div>
   </div>
 </nav>
 
-<header id="top" class="max-w-6xl mx-auto px-5 pt-20 pb-14 text-center">
-  <div class="inline-flex items-center gap-2 text-xs text-mint border border-mint/30 rounded-full px-4 py-1.5 mb-7 fade-up">
-    <span class="w-2 h-2 rounded-full bg-mint pulse"></span> товары — реальные работающие проекты
+<div class="wrap">
+  <div id="banner" class="off">
+    <span class="dot off" id="bdot"></span>
+    <span id="btxt">Проверяем статус бота…</span>
+    <button class="x" onclick="this.parentElement.hidden=true">×</button>
   </div>
-  <h1 class="text-4xl md:text-6xl font-extrabold leading-tight fade-up">Магазин, где товары —<br><span class="grad-txt">живые ИИ-проекты</span></h1>
-  <p class="mt-6 text-zinc-400 max-w-2xl mx-auto text-lg fade-up">Не «развёртка со скриншотами»: выбери проект в каталоге, собери корзину — и Telegram-бот доведёт до оплаты, примет её и спишет остаток сам. Демо запускается из магазина.</p>
-  <div class="mt-9 flex flex-wrap gap-4 justify-center fade-up">
-    <a href="#shop" class="px-7 py-3.5 rounded-xl bg-gradient-to-r from-neon to-[#5e3fff] font-semibold text-white shadow-glow hover:brightness-110 transition">🛍 В магазин</a>
-    <a :href="botUrl()" class="px-7 py-3.5 rounded-xl glass hover:bg-white/10 transition font-semibold">🤖 Открыть Telegram-бот</a>
+</div>
+
+<header class="wrap">
+  <div class="kick">товары — реальные работающие проекты</div>
+  <h1>Магазин, где каждый товар —<br><em>живая система</em>, а не презентация</h1>
+  <p class="lead">CRM, голосовой ИИ-оператор, Telegram-боты. Выберите проект, соберите корзину — бот доведёт до оплаты, примет её и спишет остаток. Без людей и звонков.</p>
+  <div class="cta">
+    <a class="btn-p" href="#shop">Выбрать проект</a>
+    <a class="btn-s" href="https://t.me/NexusDvBot" id="hero-bot">🤖 Открыть бота-консультанта</a>
   </div>
-  <div class="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4">
-    <div class="glass rounded-2xl p-5 lift"><div class="text-2xl font-extrabold grad-txt">5</div><div class="text-xs text-zinc-400 mt-1">товаров = работающий код</div></div>
-    <div class="glass rounded-2xl p-5 lift"><div class="text-2xl font-extrabold grad-txt">59s</div><div class="text-xs text-zinc-400 mt-1">средний путь карточка → заказ</div></div>
-    <div class="glass rounded-2xl p-5 lift"><div class="text-2xl font-extrabold grad-txt">24/7</div><div class="text-xs text-zinc-400 mt-1">AI-консультант в боте</div></div>
-    <div class="glass rounded-2xl p-5 lift"><div class="text-2xl font-extrabold grad-txt">0 ₽</div><div class="text-xs text-zinc-400 mt-1">инфраструктура сайта</div></div>
+  <div class="stats">
+    <div><b>5</b><span>товаров = работающий код</span></div>
+    <div><b>7–10</b><span>дней внедрение</span></div>
+    <div><b>24/7</b><span>бот-консультант отвечает сам</span></div>
+    <div><b>0 ₽</b><span>инфраструктура сайта</span></div>
   </div>
 </header>
 
-<section id="projects" class="max-w-6xl mx-auto px-5 py-14">
-  <h2 class="text-3xl font-bold">Флагманские проекты <span class="text-zinc-500 text-lg font-normal">— можно запустить прямо здесь</span></h2>
-  <div class="mt-8 grid md:grid-cols-3 gap-6">
-    <div class="glass rounded-3xl p-6 lift fade-up flex flex-col">
-      <div class="text-4xl">🧩</div>
-      <h3 class="mt-4 font-bold text-lg">Orbit CRM</h3>
-      <p class="mt-2 text-sm text-zinc-400 grow">Полноценная CRM: канбан, сделки, задачи, отчёты, AI-ассистент. FastAPI + SQLite + JWT + Alpine.</p>
-      <img src="/img/crm-flow.svg" alt="Orbit CRM интерфейс" class="mt-4 rounded-xl border border-white/10">
-      <div class="mt-5 flex gap-3">
-        <a :href="cfg.crm_demo_url ? cfg.crm_demo_url : botUrl('consult-orbit-crm')" target="_blank" class="flex-1 text-center px-4 py-2.5 rounded-xl bg-neon/25 border border-neon/50 text-sm font-semibold hover:bg-neon/40 transition" x-text="cfg.crm_demo_url ? '▶ Живое демо' : '▶ Демо через бот'"></a>
-        <button @click="add('orbit-crm'); openCart()" class="px-4 py-2.5 rounded-xl bg-mint/15 border border-mint/40 text-sm hover:bg-mint/25 transition">В корзину</button>
-      </div>
-    </div>
-    <div class="glass rounded-3xl p-6 lift fade-up flex flex-col">
-      <div class="text-4xl">🎙</div>
-      <h3 class="mt-4 font-bold text-lg">AI Call Center</h3>
-      <p class="mt-2 text-sm text-zinc-400 grow">Голосовой ИИ-оператор: XTTS v2 + Whisper, воронка звонка, база сессий. Витрина с деталями — внутри.</p>
-      <img src="/img/tts-hero.svg" alt="AI Call Center" class="mt-4 rounded-xl border border-white/10">
-      <div class="mt-5 flex gap-3">
-        <a href="/tts.html" class="flex-1 text-center px-4 py-2.5 rounded-xl bg-neon/25 border border-neon/50 text-sm font-semibold hover:bg-neon/40 transition">▶ Открыть витрину</a>
-        <button @click="add('tts'); openCart()" class="px-4 py-2.5 rounded-xl bg-mint/15 border border-mint/40 text-sm hover:bg-mint/25 transition">В корзину</button>
-      </div>
-    </div>
-    <div class="glass rounded-3xl p-6 lift fade-up flex flex-col">
-      <div class="text-4xl">🛍</div>
-      <h3 class="mt-4 font-bold text-lg">AutoShop — этот магазин</h3>
-      <p class="mt-2 text-sm text-zinc-400 grow">Магазин сам является проектом: премиальный фронт на GitHub Pages + Telegram-бот, синхронизирующий остатки в репозиторий через GitHub API.</p>
-      <img src="/img/arch-mini.svg" alt="Схема" class="mt-4 rounded-xl border border-white/10">
-      <div class="mt-5 flex gap-3">
-        <a href="#how" class="flex-1 text-center px-4 py-2.5 rounded-xl bg-neon/25 border border-neon/50 text-sm font-semibold hover:bg-neon/40 transition">▶ Как устроено</a>
-        <button @click="add('autoshop'); openCart()" class="px-4 py-2.5 rounded-xl bg-mint/15 border border-mint/40 text-sm hover:bg-mint/25 transition">В корзину</button>
-      </div>
+<section id="projects">
+  <div class="wrap">
+    <h2>Флагманы</h2>
+    <p class="sub">Три проекта открыты для изучения прямо здесь. Остальное — в каталоге ниже.</p>
+    <div class="feat">
+      <article>
+        <div class="ic">🧩</div>
+        <h3>Orbit CRM</h3>
+        <p>Канбан со сделками, задачи, дашборд KPI, роли и аудит, AI-ассистент. Full-stack на FastAPI + JWT.</p>
+        <img src="/img/crm-flow.svg" alt="Orbit CRM">
+        <div class="row">
+          <a class="demo-a" id="crm-demo" href="https://t.me/NexusDvBot?start=consult-orbit-crm">▶ Демо через бот</a>
+          <a class="buy-a" href="#" onclick="add('orbit-crm');return false">В корзину</a>
+        </div>
+      </article>
+      <article>
+        <div class="ic">🎙</div>
+        <h3>AI Call Center</h3>
+        <p>Голосовой оператор: XTTS v2 говорит, Whisper слушает, воронка звонка ведёт клиента к цели.</p>
+        <img src="/img/tts-hero.svg" alt="AI Call Center">
+        <div class="row">
+          <a class="demo-a" href="/tts.html">▶ Открыть витрину</a>
+          <a class="buy-a" href="#" onclick="add('tts');return false">В корзину</a>
+        </div>
+      </article>
+      <article>
+        <div class="ic">🛍</div>
+        <h3>AutoShop</h3>
+        <p>Этот магазин и есть продукт: GitHub Pages + бот, который сам синхронизирует остатки через GitHub API.</p>
+        <img src="/img/arch-mini.svg" alt="Архитектура AutoShop">
+        <div class="row">
+          <a class="demo-a" href="#how">▶ Как устроено</a>
+          <a class="buy-a" href="#" onclick="add('autoshop');return false">В корзину</a>
+        </div>
+      </article>
     </div>
   </div>
 </section>
 
-<section id="shop" class="max-w-6xl mx-auto px-5 py-14">
-  <h2 class="text-3xl font-bold">Каталог</h2>
-  <p class="mt-3 text-zinc-400">Кнопка «Купить» собирает корзину → открывает Telegram-бота с твоей корзиной → бот оформляет и принимает оплату. Оплата — точка интеграции любого платёжного провайдера.</p>
-  <div class="mt-8 space-y-4">
-    <template x-for="p in products" :key="p.id">
-      <div class="glass rounded-2xl p-5 md:flex items-center gap-6 lift">
-        <div class="text-4xl md:w-14 text-center" x-text="p.emoji"></div>
-        <div class="mt-4 md:mt-0 grow">
-          <h3 class="font-semibold" x-text="p.name"></h3>
-          <p class="text-sm text-zinc-400 mt-1" x-text="p.tagline"></p>
-          <div class="mt-2 flex flex-wrap gap-2">
-            <template x-for="f in p.features.slice(0,3)"><span class="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-zinc-300" x-text="f"></span></template>
-          </div>
-        </div>
-        <div class="mt-4 md:mt-0 flex items-center gap-4">
-          <span class="text-xs px-3 py-1.5 rounded-lg border" :class="p.qty>0 ? 'border-mint/40 text-mint' : 'border-red-400/40 text-red-300'" x-text="p.qty>0 ? '📦 в наличии: '+p.qty : 'нет в наличии'"></span>
-          <span class="font-bold text-gold" x-text="p.price+' ₽ '+p.unit"></span>
-          <button @click="add(p.id); openCart()" :disabled="p.qty<=0" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-neon to-[#5e3fff] text-white text-sm font-semibold hover:brightness-110 transition disabled:opacity-30 disabled:cursor-not-allowed">Купить</button>
-        </div>
-      </div>
-    </template>
+<section id="shop">
+  <div class="wrap">
+    <h2>Каталог</h2>
+    <p class="sub">Оплата — разовая, без подписок. В цену входит внедрение и поддержка. Скидок нет — и это честно.</p>
+    <div id="catalog-list"><div class="crow"><div class="mid" style="color:var(--mut)">Загружаем каталог…</div></div></div>
   </div>
 </section>
 
-<section id="how" class="max-w-6xl mx-auto px-5 py-14">
-  <h2 class="text-3xl font-bold">Как устроена автономность</h2>
-  <div class="mt-8 grid md:grid-cols-5 gap-4 text-sm">
-    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">1 · Выбор</div><p class="mt-2 text-zinc-400">Остатки лежат в репозитории сайта; бот держит их синхронно через GitHub API.</p></div>
-    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">2 · Корзина</div><p class="mt-2 text-zinc-400">Собирается на сайте (localStorage) или в чате бота (FSM).</p></div>
-    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">3 · Передача</div><p class="mt-2 text-zinc-400">«Оплатить» кодирует корзину в ссылке-начале бота — бот уже всё знает.</p></div>
-    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">4 · Оплата</div><p class="mt-2 text-zinc-400">Бот подтверждает заказ и принимает оплату (демо / провайдер).</p></div>
-    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">5 · Списание</div><p class="mt-2 text-zinc-400">Остаток падает, журнал продаж пишется, сайт обновляется сам.</p></div>
+<section id="how">
+  <div class="wrap">
+    <h2>Как работает автономность</h2>
+    <div class="how">
+      <div><b>1 · Выбор</b>Остатки лежат в репозитории сайта и обновляются сами.</div>
+      <div><b>2 · Корзина</b>На сайте (localStorage) или в чате бота.</div>
+      <div><b>3 · Передача</b>«Оплатить» кодирует корзину в стартовой ссылке бота.</div>
+      <div><b>4 · Оплата</b>Бот подтверждает заказ и принимает оплату.</div>
+      <div><b>5 · Списание</b>Остаток падает, журнал пишется, сайт обновляется.</div>
+    </div>
   </div>
 </section>
 
-<!-- CART -->
-<div x-show="cartOpen" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="cartOpen=false">
-  <div class="absolute inset-0 bg-black/70" @click="cartOpen=false"></div>
-  <aside class="absolute right-0 top-0 h-full w-full max-w-md glass p-6 overflow-y-auto">
-    <div class="flex justify-between items-center">
-      <h3 class="text-xl font-bold">🛒 Корзина</h3>
-      <button @click="cartOpen=false" class="text-zinc-400 hover:text-white text-2xl leading-none">×</button>
-    </div>
-    <template x-for="p in products" :key="p.id">
-      <div x-show="qty(p.id)>0" class="mt-5 glass rounded-xl p-4 flex items-center gap-4">
-        <div class="grow"><div class="font-semibold text-sm" x-text="p.name"></div><div class="text-xs text-zinc-400 mt-1" x-text="p.price+' ₽ × '+qty(p.id)"></div></div>
-        <div class="flex items-center gap-2">
-          <button @click="dec(p.id)" class="w-8 h-8 rounded-lg glass hover:bg-white/10">−</button>
-          <span x-text="qty(p.id)" class="w-6 text-center font-bold"></span>
-          <button @click="inc(p.id)" class="w-8 h-8 rounded-lg glass hover:bg-white/10">＋</button>
-        </div>
-      </div>
-    </template>
-    <div x-show="count()>0" class="mt-6">
-      <div class="flex justify-between text-lg font-bold"><span>Итого</span><span x-text="total()+' ₽'"></span></div>
-      <button @click="checkout()" class="mt-5 w-full py-3.5 rounded-xl bg-gradient-to-r from-neon to-[#5e3fff] font-bold text-white shadow-glow hover:brightness-110 transition">💳 Оплатить через Telegram</button>
-      <p class="text-[11px] text-zinc-500 mt-3">Корзина передастся боту ссылкой — там останется подтвердить и оплатить.</p>
-    </div>
-    <div x-show="!count()" class="mt-16 text-center text-zinc-500">Пусто. Загляни в <a href="#shop" class="text-mint" @click="cartOpen=false">каталог</a> 👀</div>
-  </aside>
-</div>
+<div id="ovl" onclick="closeCart()"></div>
+<aside id="drawer">
+  <div class="dr-h"><b>🛒 Корзина</b><button onclick="closeCart()">×</button></div>
+  <div class="dr-b" id="drbody"></div>
+  <div class="dr-f" id="drfoot" style="display:none">
+    <div class="dr-t"><span>Итого</span><span id="drtotal">0 ₽</span></div>
+    <a class="ck" href="#" id="ck">💳 Оплатить через Telegram</a>
+    <div class="warn" id="warn">⚠️ Бот сейчас офлайн, но корзина не пропадёт: Telegram сохранит ваше сообщение, и бот обработает его при следующем запуске.</div>
+    <p style="font-size:11px;color:var(--mut);margin-top:10px">Корзина передастся боту ссылкой — там останется подтвердить заказ.</p>
+  </div>
+</aside>
 
-<footer class="max-w-6xl mx-auto px-5 py-16 text-center text-sm text-zinc-500">
-  <p>AutoShop Portfolio · GitHub Pages + Telegram-бот (GitHub API sync) · AI: любой OpenAI-совместимый API</p>
-  <p class="mt-2">Всё, что здесь продаётся, я умею делать для вашего бизнеса 💼</p>
+<footer>
+  <p>AutoShop · сайт — <a href="https://github.com/nwl01234/portfolio-app">GitHub Pages</a> (код магазина открыт) · консультант — Telegram-бот без GPT, на базе знаний</p>
+  <p style="margin-top:10px">Всё, что здесь продаётся, я умею собирать и внедрять для вашего бизнеса.</p>
 </footer>
 
 <script>
-function shop(){
-  return {
-    products: [], items: {}, cartOpen: false, cfg: {bot_username:'NexusDvBot', crm_demo_url:''},
-    async init(){
-      try{ const c = await (await fetch('/data/config.json')).json(); this.cfg = {...this.cfg, ...c} }catch{}
-      try{ const d = await (await fetch('/data/products.json')).json(); this.products = d.products }catch(e){ console.error(e) }
-      try{ this.items = JSON.parse(localStorage.getItem('as_cart')||'{}') }catch{ this.items={} }
-    },
-    qty(id){ return this.items[id]||0 },
-    count(){ return Object.values(this.items).reduce((s,n)=>s+n,0) },
-    total(){ return this.products.reduce((s,p)=>s+(p.price*(this.items[p.id]||0)),0) },
-    add(id){ const p=this.products.find(x=>x.id===id); if(!p||this.qty(id)>=p.qty) return; this.items[id]=this.qty(id)+1; this.save() },
-    inc(id){ this.add(id) },
-    dec(id){ if(this.items[id]){ this.items[id]--; if(!this.items[id]) delete this.items[id]; this.save() } },
-    save(){ localStorage.setItem('as_cart', JSON.stringify(this.items)) },
-    openCart(){ this.cartOpen=true },
-    botUrl(payload){
-      const start = payload ? '?start='+btoa(unescape(encodeURIComponent(payload))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'') : '';
-      return 'https://t.me/'+(this.cfg.bot_username||'NexusDvBot')+start;
-    },
-    checkout(){
-      const payload = 'ORD'+btoa(unescape(encodeURIComponent(JSON.stringify({
-        src:'site', items:this.items, at:Date.now()
-      })))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-      location.href = this.botUrl(payload);
-    }
+/* ---------- состояние ---------- */
+var PRODUCTS = [], ITEMS = {}, CFG = {bot_username:'NexusDvBot', crm_demo_url:''};
+
+/* ---------- каталог ---------- */
+function money(n){ return n.toLocaleString('ru-RU') + ' ₽' }
+
+function renderCatalog(){
+  var host = document.getElementById('catalog-list');
+  host.innerHTML = '';
+  PRODUCTS.forEach(function(p){
+    var row = document.createElement('div'); row.className = 'crow';
+    var feats = (p.features||[]).slice(0,3).map(function(f){return '<i>'+f+'</i>'}).join('');
+    var q = p.qty > 0 ? '<span class="qty-chip">📦 в наличии: '+p.qty+'</span>' : '<span class="qty-chip zero">нет в наличии</span>';
+    row.innerHTML =
+      '<div class="e">'+p.emoji+'</div>'+
+      '<div class="mid"><h3>'+p.name+'</h3><div class="tg">'+p.tagline+'</div><div class="tags">'+feats+'</div></div>'+
+      '<div class="r"><span class="price">'+money(p.price)+'</span> <span class="unit">'+p.unit+'</span><br>'+q+'<br>'+
+      '<button '+(p.qty<=0?'disabled':'')+' onclick="add(\''+p.id+'\')">Купить</button></div>';
+    host.appendChild(row);
+  });
+}
+
+/* ---------- корзина ---------- */
+function cartCount(){ var n=0; for(var k in ITEMS) n+=ITEMS[k]; return n }
+function cartTotal(){ var t=0; PRODUCTS.forEach(function(p){ t+=p.price*(ITEMS[p.id]||0) }); return t }
+
+function saveCart(){ try{ localStorage.setItem('as_cart', JSON.stringify(ITEMS)) }catch(e){} drawBadges() }
+
+function add(id){
+  var p = PRODUCTS.find(function(x){return x.id===id}); if(!p) return;
+  if((ITEMS[id]||0) >= p.qty) return;
+  ITEMS[id] = (ITEMS[id]||0)+1; saveCart(); renderCart(); openCart();
+}
+
+function drawBadges(){
+  var n = cartCount(), b = document.getElementById('nbadge');
+  b.textContent = n; b.style.display = n ? 'flex' : 'none';
+}
+
+function itemHtml(p){
+  return '<div class="ci"><div class="n">'+p.name+'<div class="p">'+money(p.price)+' × '+(ITEMS[p.id]||0)+'</div></div>'+
+    '<div><button class="qbtn" onclick="bump(\''+p.id+'\',-1)">−</button> <span class="qv">'+(ITEMS[p.id]||0)+'</span> '+
+    '<button class="qbtn" onclick="bump(\''+p.id+'\',1)">＋</button></div></div>';
+}
+
+function renderCart(){
+  var body = document.getElementById('drbody'), foot = document.getElementById('drfoot');
+  var ids = PRODUCTS.filter(function(p){ return ITEMS[p.id] > 0 });
+  if(!ids.length){
+    body.innerHTML = '<div class="empty">Пока пусто. Загляните в <a href="#shop" onclick="closeCart()">каталог</a></div>';
+    foot.style.display = 'none'; drawBadges(); return;
+  }
+  body.innerHTML = ids.map(itemHtml).join('');
+  document.getElementById('drtotal').textContent = money(cartTotal());
+  var payload = 'ORD' + b64url(JSON.stringify({src:'site', items:ITEMS, at:Date.now()}));
+  document.getElementById('ck').href = 'https://t.me/' + (CFG.bot_username||'NexusDvBot') + '?start=' + payload;
+  var w = document.getElementById('warn');
+  if(BOT_STATUS === false) w.classList.add('show'); else w.classList.remove('show');
+  foot.style.display = 'block'; drawBadges();
+}
+
+function bump(id, d){ var p=PRODUCTS.find(function(x){return x.id===id}); if(!p) return;
+  ITEMS[id]=(ITEMS[id]||0)+d; if(ITEMS[id]>p.qty){ITEMS[id]=p.qty} if(ITEMS[id]<=0){delete ITEMS[id]}
+  saveCart(); renderCart(); }
+
+function openCart(){ renderCart(); document.getElementById('drawer').classList.add('show'); document.getElementById('ovl').classList.add('show'); }
+function closeCart(){ document.getElementById('drawer').classList.remove('show'); document.getElementById('ovl').classList.remove('show'); }
+
+/* ---------- статус бота (бот пишет data/bot_status.json при запуске/остановке) ---------- */
+var BOT_STATUS = null;
+function setStatus(online){
+  BOT_STATUS = online;
+  var bn = document.getElementById('banner'), bd = document.getElementById('bdot'), bt = document.getElementById('btxt');
+  var sn = document.getElementById('stnav');
+  if(online === true){
+    bn.className='on'; bd.className='dot on';
+    bt.innerHTML = '<b>Бот на связи.</b> Консультант отвечает прямо сейчас — спросите что угодно о проектах.';
+    sn.innerHTML = '<span class="dot on"></span>бот на связи';
+  }else{
+    bn.className='off'; bd.className='dot off';
+    bt.innerHTML = '<b>Бот сейчас офлайн.</b> Корзины и сообщения не теряются: Telegram хранит их, и бот всё обработает, как только включат.';
+    sn.innerHTML = '<span class="dot off"></span>бот офлайн';
   }
 }
+function pollStatus(){
+  var t = Date.now();
+  fetch('/data/bot_status.json?_=' + t, {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null })
+    .then(function(d){ setStatus(d ? !!d.online : false) })
+    .catch(function(){ setStatus(false) });
+}
+
+/* ---------- утилиты ---------- */
+function b64url(s){
+  return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+/* ---------- init ---------- */
+(function(){
+  fetch('/data/products.json', {cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+    PRODUCTS = d.products; renderCatalog();
+  }).catch(function(){
+    document.getElementById('catalog-list').innerHTML = '<div class="crow"><div class="mid">Каталог временно недоступен — откройте <a href="https://t.me/NexusDvBot" style="color:var(--gold)">бота</a>.</div></div>';
+  });
+  try{ ITEMS = JSON.parse(localStorage.getItem('as_cart')||'{}') }catch(e){ ITEMS={} }
+  drawBadges();
+  fetch('/data/config.json', {cache:'no-store'}).then(function(r){return r.json()}).then(function(c){
+    CFG = Object.assign(CFG, c);
+    if(CFG.bot_username){ document.getElementById('hero-bot').href = 'https://t.me/' + CFG.bot_username;
+      var cd = document.getElementById('crm-demo');
+      if(CFG.crm_demo_url) cd.href = CFG.crm_demo_url;
+    }
+  }).catch(function(){});
+  pollStatus(); setInterval(pollStatus, 60000);
+})();
 </script>
 </body>
 </html>

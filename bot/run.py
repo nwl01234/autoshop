@@ -22,9 +22,18 @@ async def main():
     if url:
         await bot.delete_webhook(drop_pending_updates=False)
     print(f"Bot @{me.username} запущен · каталог: {len(_products())} товаров · GitHub sync: {'on' if cfg.GITHUB_TOKEN else 'local'}")
+
+    def _status(mode: str) -> None:
+        from . import storage
+        r = storage.set_bot_status(mode == "up")
+        if r == "github":
+            print(f"[status] сайт обновлён: бот {mode}")
+
+    _status("up")
     try:
         await dp.start_polling(bot, handle_signals=False)
     finally:
+        _status("down")
         await bot.session.close()
 
 
