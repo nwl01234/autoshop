@@ -345,6 +345,14 @@ footer a:hover{color:var(--ink)}
             <div class="acc-item"><h4>Как хранить косметику?</h4><div class="a">Сыворотки — в тёмном месте до +20°C. Крем для глаз — приятнее в холодильнике. Остальное — по инструкции на упаковке.</div></div>
             <div class="acc-item"><h4>Есть ли тестеры?</h4><div class="a">Мини-набор сэмплов — спросите консультанта в чате, положим к заказу бесплатно, пока идёт акция.</div></div>
           </div>
+          <h4 class="kicker" style="margin:26px 0 6px">КАК УСТРОЕН САЙТ</h4>
+          <p>
+            <b>Фронт</b> — SPA без фреймворков: hash-роутер, компонентные витрины, WebApp-интеграция.
+            <b>Бэкенд</b> — REST API на <span class="mono">server/app.py</span>: каталог, статус и
+            <span class="mono">POST /api/orders</span> — атомарная валидация и списание остатков с журналом заказов
+            (<span class="mono">data/orders.json</span>). Фронт работает в двух режимах: с живым API — и
+            статик-режим на GitHub Pages, где заказ уходит в чат-бота Telegram.
+          </p>
         </div>
       </div>
     </div>
@@ -398,9 +406,22 @@ function saveCart(){ localStorage.setItem('lume_cart', JSON.stringify(CART)); re
 function cartCount(){ var n=0,k; for(k in CART) n+=CART[k]; return n; }
 function cartTotal(){ var s=0; for(var k in CART){ var p=BYID[k]; if(p) s+=p.price*CART[k]; } return s; }
 
-/* ---------- API (backend read layer) ---------- */
+/* ---------- API (frontend ⇄ backend) ---------- */
+/* Локальный бэкенд: server/app.py (REST на 127.0.0.1:8300).
+   Если он поднят — все данные и заказы идут через него.
+   Если сайт открыт со Pages — статик-режим: данные из data/*.json,
+   заказ → deep-link в Telegram-бота. */
+var BACKEND = false;
+var API_ROUTES = { 'products.json': 'products', 'bot_status.json': 'status' };
+function tryBackend(){
+  return fetch('/api/health?_='+Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok })
+    .catch(function(){ return false });
+}
 function apiGet(name){
-  return fetch('/data/'+name+'?_='+Date.now(), {cache:'no-store'}).then(function(r){
+  var route = BACKEND ? API_ROUTES[name] : null;
+  var url = route ? ('/api/'+route) : '/data/'+name;
+  return fetch(url+'?_='+Date.now(), {cache:'no-store'}).then(function(r){
     if(!r.ok) throw new Error(r.status); return r.json();
   });
 }
@@ -593,9 +614,11 @@ function renderCartPage(){
   '<div class="toth"><div class="sumline"><span>Доставка СДЭК / Боксберри</span><span>24–48 ч · бесплатно от 3500₽</span></div>'+
   '<div class="sumline"><span>Товаров</span><span>'+n+'</span></div>'+
   '<div class="sumline"><span>Итого</span><b>'+fmt(total)+'</b></div></div>'+
-  '<div class="cart-actions"><button class="btn acc" id="checkout">Оформить через Telegram</button>'+
+  '<div class="cart-actions"><button class="btn acc" id="checkout">'+(BACKEND?'Оформить заказ':'Оформить через Telegram')+'</button>'+
   '<a class="btn ghost" href="#/catalog">Продолжить</a></div>'+
-  '<p style="margin-top:14px;color:var(--mut);font-size:13px">Заказ откроется в чате с консультантом LUMÉ: подтвердим наличие, возьмём адрес и отправим трек.</p>';
+  '<p style="margin-top:14px;color:var(--mut);font-size:13px">'+(BACKEND
+    ? 'Заказ проходит через REST-бэкенд этого сайта: проверка и списание остатков — мгновенно, на сервере.'
+    : 'Заказ откроется в чате с консультантом LUMÉ: подтвердим наличие, возьмём адрес и отправим трек.')+'</p>';
 
   $$('#v-cart [data-cq]').forEach(function(b){ b.onclick=function(){ setQty(b.dataset.cq, CART[b.dataset.cq]+ +b.dataset.d); render(); }; });
   $$('#v-cart [data-rm]').forEach(function(a){ a.onclick=function(e){ e.preventDefault(); cartRemove(a.dataset.rm); render(); }; });
@@ -603,7 +626,32 @@ function renderCartPage(){
 }
 function checkout(){
   if(!cartCount()) return;
-  var raw = JSON.stringify({src:'site', items:CART});
+  var items={}; for(var k in CART) items[k]=CART[k];
+  if(BACKEND){
+    $('#checkout').disabled=true; $('#checkout').textContent='Оформляем…';
+    fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({items:items})}).then(function(r){return r.json().then(function(j){return {code:r.status,j:j}})})
+      .then(function(res){
+        if(res.code===200 && res.j.ok){
+          CART={}; saveCart(); haptic('heavy');
+          var w=$('#cartWrap');
+          w.innerHTML='<div class="empty"><div class="big">Заказ '+res.j.id+' принят ✳</div>'+
+            '<p>Итого к оплате: <b>'+fmt(res.j.total)+'</b></p>'+
+            '<p style="margin-top:8px">Склад уже уменьшился — остатки на сайте обновились. '+
+            'Оплата и трек приходят в чате консультанта.</p>'+
+            '<a class="btn acc" style="margin-top:20px" href="#/catalog">В каталог</a></div>';
+          loadBackend().catch(function(){});
+        } else if(res.code===409){
+          toast('Остатки изменились — поправьте корзину'); haptic('rigid');
+          loadBackend().then(function(){ render(); });
+        } else {
+          toast(res.j.error||'Не удалось оформить'); render();
+        }
+      }).catch(function(){ toast('Сервер недоступен'); render(); });
+    return;
+  }
+  /* статик-режим (Pages / file://): заказ уходит боту */
+  var raw = JSON.stringify({src:'site', items:items});
   var b = btoa(unescape(encodeURIComponent(raw))).replace(/=+$/,'');
   var url='https://t.me/'+CONFIG.bot_username+'?start=ORD'+b;
   if(T && T.openTelegramLink) T.openTelegramLink(url);
@@ -611,21 +659,26 @@ function checkout(){
   else window.open(url,'_blank');
 }
 
-/* ---------- status (backend beacon) ---------- */
+/* ---------- status (.HttpSession وضع) ---------- */
 function loadStatus(){
   apiGet('bot_status.json').then(function(d){
     var pill=$('#stpill'); if(!pill) return;
     STATUS=d;
     pill.hidden=false;
-    pill.innerHTML = d.online? '<span class="dot pu"></span>Консультант на связи'
-                             : '<span class="dot off"></span>Консультант оффлайн';
+    pill.innerHTML = (d.online!==false && d.consultant!=='away')
+      ? '<span class="dot pu"></span>Консультант на связи'
+      : '<span class="dot off"></span>Консультант оффлайн';
   }).catch(function(){});
 }
 
 /* ---------- data boot ---------- */
 function boot(){
-  loadConfig();
-  loadBackend().then(function(){
+  tryBackend().then(function(ok){
+    BACKEND=ok;
+    return loadConfig();
+  }).then(function(){
+    return loadBackend();
+  }).then(function(){
     fillMarquee();
     render();
     renderCartBadge();
