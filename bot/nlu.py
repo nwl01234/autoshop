@@ -1,74 +1,56 @@
-"""NLU бота: интенции (паттерн → fuzzy-фолбэк) + поиск товара (точный ключ → fuzzy).
-
-Держим в уме кривой русский: «католог», «хачу срм», «ттс колл центр», «автошоп».
-"""
+"""NLU магазина LUMÉ: интент + guess_product (substring + fuzzy)."""
 import re
 from difflib import SequenceMatcher
 
-PATTERN_RULES = [
-    ("checkout", r"оплач\w*|оплат\w*|оформить|чекаут"),
-    ("cart",     r"кор[зс]ин|карзин|добав|в\s+корз"),
-    ("catalog",  r"каталог\w*|товар\w*|ассортимен\w*|магазин|купить|куплю"),
-    ("demos",    r"демо|демонстрац|запусти|проект\w*"),
-    ("help",     r"помо[щч]|help|\?$"),
-    ("gibberish", r"^лол$|лмао|ъыъ|азаза|azaz|^хд$|бип|буп|^ыва$|куку"),
+INTENTS = [
+    ("cart",     r"корзин|в корзин|telega тележк|cart"),
+    ("catalog",  r"каталог|товар|ассорт|что есть|показать вс|что прода"),
+    ("checkout", r"оформ|оплат|заказ|чекоут|куплю|взять"),
+    ("help",     r"помощь|что умеешь|как эт|help|¿"),
+    ("delivery", r"достав|сдэк|почт|когда прид"),
 ]
-FUZZY_RULES = {  # если паттерн не попал, интенцию спарим по схожести слова
-    "catalog":  ["каталог", "категория", "показать всё", "асортимент"],
-    "cart":     ["корзина", "корз"],
-    "checkout": ["оформить", "оплатить", "заказать"],
-    "demos":    ["демо", "проекты", "витрина"],
-    "help":     ["помощь", "справка", "что ты умеешь"],
-}
+
 KEYS = {
-    "autoshop":  ["autoshop", "автосхоп", "автошоп", "авташоп", "авашоп", "магазин под ключ", "автономный магазин", "магазин"],
-    "orbit-crm": ["orbit crm", "срм", "црм", "crm", "орбит", "мини-срм", "система продаж", "лид", "воронка", "сделк"],
-    "tts":       ["call center", "каллцентр", "калл-центр", "колл-центр", "колл", "озвучк", "голос", "tts", "ттс", "звонк", "оператор", "whisper"],
-    "tgbot":     ["бот под заказ", "заказать бот", "бот для бизнеса", "телеграм бот", "телеграм-бот", "тгбот"],
-    "ai-int":    ["ии", "нейросет", "чат-бот", "rag", "автоматизация", "интеграц", "ии-автоматиза"],
+    "serum":  ["сыворотк", "serum", "гиалурон", "увлажнени", "хналурон"],
+    "retinol": ["ретинол", "ретиналь", "ретин", "retinol"],
+    "spf50":  ["spf", "спф", "сфп", "санскрин", "защит", "солнц", "солнца", "флюид"],
+    "vitc":   ["витамин с", "витам с", "аскорб", "vitamin", "сияни", "постакне", "тон"],
+    "clay":   ["маска", "глина", "глиня", "пор", "детокс", "чёрные точк"],
+    "eye":    ["глаз", "мешк", "круги", "кофеин", "eyes"],
+    "balm":   ["бальзам", "демакияж", "умыван", "очищени", "очищаю", "бальзам умыван"],
+    "toner":  ["тонер", "aha", "bha", "кислот", "пилинг", "текстур"],
 }
 
-THRESH = 0.58
+
+def guess(q: str) -> tuple[str, str | None]:
+    """(intent, product_id | None)"""
+    ql = (q or "").lower().replace("ё", "е").strip()
+    if not ql:
+        return ("gibberish", None)
+    for name, pattern in INTENTS:
+        if re.search(pattern, ql):
+            return (name, guess_product(ql))
+    if guess_product(ql):
+        return ("product", guess_product(ql))
+    # длинное кириллическое слово → похоже на нормальный вопрос
+    if re.search(r"[а-яa-z]{4,}", ql):
+        return ("faq", None)
+    return ("gibberish", None)
 
 
-def _norm(text: str) -> str:
-    return (text or "").lower().replace("ё", "е").strip()
-
-
-def guess_product(t: str) -> str | None:
-    # 1) точное вхождение ключа бьёт fuzzy (важно для коротких: «срм», «ттс»)
+def guess_product(q: str) -> str | None:
+    t = (q or "").lower().replace("ё", "е")
     for pid, keys in KEYS.items():
         for k in keys:
             if len(k) >= 3 and k in t:
                 return pid
-    # 2) fuzzy по опечатке
-    best_pid, best = None, 0.0
+    # fuzz по словам запроса
+    words = re.findall(r"\w{4,}", t)
+    best, score = None, 0.0
     for pid, keys in KEYS.items():
         for k in keys:
-            r = SequenceMatcher(None, t, k).ratio()
-            if r > best:
-                best_pid, best = pid, r
-    return best_pid if best >= THRESH else None
-
-
-def _fuzzy_intent(t: str) -> str | None:
-    # сравниваем по словам: «хачу католог» → «католог»~«каталог» = 0.93
-    tokens = re.findall(r"\w{3,}", t) or [t]
-    for intent, words in FUZZY_RULES.items():
-        for w in words:
-            for tok in tokens:
-                if w in tok or tok in w or SequenceMatcher(None, tok, w).ratio() >= 0.72:
-                    return intent
-    return None
-
-
-def guess(text: str) -> tuple[str, str | None]:
-    t = _norm(text)
-    for intent, pat in PATTERN_RULES:
-        if re.search(pat, t):
-            return intent, guess_product(t)
-    intent = _fuzzy_intent(t)
-    if intent:
-        return intent, guess_product(t)
-    pid = guess_product(t)
-    return ("catalog", pid) if pid else ("gibberish", None)
+            for w in words:
+                r = SequenceMatcher(None, w, k).ratio()
+                if r > score:
+                    best, score = pid, r
+    return best if score >= 0.76 else None

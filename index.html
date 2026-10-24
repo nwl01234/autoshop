@@ -2,405 +2,404 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AutoShop — магазин работающих ИИ-проектов</title>
-<meta name="description" content="Не презентации, а работающий софт: CRM для отдела продаж, голосовой ИИ-оператор, Telegram-боты. Выберите проект — Telegram-бот доведёт до оплаты сам.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LUMÉ — уходовая косметика с честными остатками</title>
+<meta name="description" content="LUMÉ: сыворотки, SPF, ретинол. Заказ — в один тап внутри Telegram. Живые остатки, доставка 24–48 часов.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="AutoShop — магазин работающих ИИ-проектов">
-<meta property="og:description" content="CRM, голосовой ИИ-оператор, боты. Оплата и выдача — автоматом через Telegram.">
+<meta property="og:title" content="LUMÉ — уходовая косметика">
+<meta property="og:description" content="Сыворотки, SPF, ретинол. Заказ в один тап внутри Telegram. Живые остатки.">
 <meta property="og:image" content="/img/og-card.png">
-<meta name="theme-color" content="#0e0f13">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e0f13'/%3E%3Ctext x='32' y='44' font-family='Georgia' font-size='34' fill='%23e0b060' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#fbfbfd">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23fbfbfd'/%3E%3Ctext x='32' y='43' font-family='Helvetica' font-size='26' font-weight='700' fill='%231d1d1f' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
 <style>
 :root{
-  --bg:#0e0f13; --bg2:#13151b; --card:#171a22; --line:#ffffff14;
-  --tx:#eceae4; --mut:#9a978f; --gold:#e0b060; --gold2:#f3d49a; --grn:#6fd6a0;
+  --bg:#fbfbfd; --bg2:#f5f5f7; --card:#ffffff; --line:#e8e8ed;
+  --tx:#1d1d1f; --mut:#6e6e73; --acc:#0f0f10; --rose:#c98a7d; --grn:#1d7a46; --red:#c0392b;
+  --ease:cubic-bezier(.22,.61,.2,1);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--tx);font:16px/1.6 "Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--tx);font:15px/1.5 -apple-system,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
 a{color:inherit;text-decoration:none}
-.ser{font-family:Georgia,"Times New Roman",serif}
+img{display:block}
 
-/* ---------- nav ---------- */
-nav{position:sticky;top:0;z-index:50;background:rgba(14,15,19,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.nav-in{max-width:1080px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:baseline;gap:10px;font-size:20px}
-.brand b{font-family:Georgia,serif;font-weight:600;letter-spacing:.5px}
-.brand span{font-size:11px;color:var(--mut);letter-spacing:2.5px;text-transform:uppercase}
-.nav-r{display:flex;align-items:center;gap:22px}
-.nav-l{display:flex;gap:22px;font-size:14px;color:var(--mut)}
+/* ---- nav ---- */
+nav{position:sticky;top:0;z-index:60;background:rgba(251,251,253,.82);backdrop-filter:saturate(180%) blur(18px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1120px;margin:0 auto;padding:0 22px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:19px;font-weight:700;letter-spacing:2px}
+.nav-l{display:flex;gap:26px;font-size:13.5px;color:var(--mut)}
 .nav-l a:hover{color:var(--tx)}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px}
-.dot.on{background:var(--grn);box-shadow:0 0 10px var(--grn);animation:pu 1.6s infinite}
+.cart-btn{position:relative;display:flex;align-items:center;gap:6px;background:none;border:0;font-size:13.5px;color:var(--tx);cursor:pointer;padding:8px 10px;border-radius:10px}
+.cart-btn:hover{background:var(--bg2)}
+.nbadge{position:absolute;top:-3px;right:-1px;background:var(--rose);color:#fff;font-size:10.5px;font-weight:700;min-width:17px;height:17px;border-radius:10px;display:none;align-items:center;justify-content:center;padding:0 4px;transition:transform .25s var(--ease)}
+.nbadge.pop{transform:scale(1.25)}
+@media(max-width:720px){.nav-l{display:none}}
+
+/* ---- status ---- */
+#status{max-width:1120px;margin:16px auto 0;padding:0 22px}
+#stpill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mut);border:1px solid var(--line);background:#fff;border-radius:100px;padding:7px 14px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--grn)}
+.dot.pu{animation:pu 1.8s infinite}
 .dot.off{background:#c8a24e}
-@keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
-#stnav{font-size:13px;color:var(--mut)}
-.cart-btn{position:relative;background:var(--gold);color:#141310;border:0;border-radius:10px;padding:9px 18px;font-weight:600;font-size:14px;cursor:pointer}
-.cart-btn:hover{background:var(--gold2)}
-.nbadge{position:absolute;top:-7px;right:-7px;background:#d75445;color:#fff;font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:10px;display:none;align-items:center;justify-content:center;padding:0 5px}
-@media(max-width:760px){.nav-l{display:none}}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.35}}
+#stpill[hidden]{display:none}
 
-/* ---------- status banner ---------- */
-#banner{max-width:1080px;margin:26px auto 0;border-radius:16px;padding:15px 20px;display:flex;gap:14px;align-items:center;font-size:14.5px;border:1px solid}
-#banner.on{background:linear-gradient(90deg,#12241b,#101720);border-color:#6fd6a044;color:#cfecdd}
-#banner.off{background:linear-gradient(90deg,#2a2115,#17161a);border-color:#c8a24e44;color:#ecdfc8}
-#banner b{color:#fff}
-#banner .x{margin-left:auto;color:var(--mut);cursor:pointer;font-size:18px;background:none;border:0}
-#banner[hidden]{display:none}
+/* ---- hero ---- */
+.hero{padding:84px 0 64px;text-align:center}
+.kick{font-size:13px;color:var(--rose);font-weight:600;margin-bottom:18px;letter-spacing:.3px}
+h1{font-size:clamp(40px,7vw,76px);font-weight:700;letter-spacing:-.025em;line-height:1.04}
+h1 .soft{color:var(--mut);font-weight:600;letter-spacing:-.02em}
+.lead{max-width:600px;margin:22px auto 0;font-size:19px;color:var(--mut);letter-spacing:0}
+.cta{margin-top:32px;display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--acc);color:#fff;border-radius:980px;padding:14px 28px;font-size:15px;font-weight:600;transition:transform .25s var(--ease),opacity .2s;border:0;cursor:pointer}
+.btn:hover{transform:scale(1.03)}
+.btn:active{transform:scale(.97);opacity:.8}
+.btn.ghost{background:none;color:var(--tx);border:1px solid var(--line)}
+.btn.ghost:hover{background:#fff}
 
-/* ---------- hero ---------- */
-header{padding:84px 0 70px;text-align:center}
-.kick{display:inline-block;font-size:12px;letter-spacing:3.5px;text-transform:uppercase;color:var(--gold);border:1px solid #e0b06033;border-radius:100px;padding:10px 22px;margin-bottom:34px}
-h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(38px,6vw,64px);line-height:1.13;letter-spacing:-.5px}
-h1 em{font-style:italic;color:var(--gold)}
-.lead{max-width:640px;margin:26px auto 0;color:var(--mut);font-size:18px}
-.cta{margin-top:38px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.btn-p{background:var(--gold);color:#141310;font-weight:600;border-radius:12px;padding:15px 30px;font-size:15px;display:inline-block}
-.btn-p:hover{background:var(--gold2)}
-.btn-s{border:1px solid var(--line);border-radius:12px;padding:15px 30px;font-size:15px;color:var(--tx);display:inline-block}
-.btn-s:hover{border-color:#ffffff40;background:#ffffff08}
-.stats{margin-top:64px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-.stats div{background:var(--bg);padding:26px 12px}
-.stats b{display:block;font-family:Georgia,serif;font-size:30px;font-weight:500;color:var(--gold)}
-.stats span{font-size:13px;color:var(--mut)}
-@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+/* Статистика */
+.stats{display:flex;gap:0;margin-top:56px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff}
+.stats div{flex:1;padding:22px 10px;text-align:center;border-left:1px solid var(--line)}
+.stats div:first-child{border-left:0}
+.stats b{display:block;font-size:25px;font-weight:700}
+.stats span{font-size:12.5px;color:var(--mut)}
+@media(max-width:720px){.stats{flex-wrap:wrap}.stats div{flex:1 1 50%;border-top:1px solid var(--line)}}
 
-/* ---------- sections ---------- */
-section{padding:74px 0;border-top:1px solid var(--line)}
-h2{font-family:Georgia,serif;font-weight:500;font-size:32px}
-.sub{color:var(--mut);margin-top:12px;max-width:640px}
+/* ---- sections ---- */
+section{padding:76px 0}
+.shead{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h2{font-size:34px;font-weight:700;letter-spacing:-.02em}
+.sub{color:var(--mut);margin-top:10px;font-size:16px;max-width:560px}
 
-/* featured */
-.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
-.feat article{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;transition:.25s}
-.feat article:hover{transform:translateY(-5px);border-color:#e0b06055}
-.feat .ic{font-size:34px}
-.feat h3{font-family:Georgia,serif;font-weight:500;font-size:21px;margin-top:16px}
-.feat p{color:var(--mut);font-size:14.5px;margin-top:10px;flex-grow:1}
-.feat img{margin-top:18px;border-radius:12px;border:1px solid var(--line);width:100%}
-.feat .row{display:flex;gap:10px;margin-top:20px}
-.feat .row a{flex:1;text-align:center;padding:12px 4px;border-radius:11px;font-size:13.5px;font-weight:600}
-.demo-a{background:#e0b0601f;border:1px solid #e0b06066;color:var(--gold2)}
-.demo-a:hover{background:#e0b06033}
-.buy-a{background:var(--gold);color:#141310}
-.buy-a:hover{background:var(--gold2)}
-@media(max-width:880px){.feat{grid-template-columns:1fr}}
+/* ---- каталог ---- */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:36px}
+@media(max-width:1020px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:430px){.grid{grid-template-columns:1fr}}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.pcard:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.08)}
+.pcard .ph{aspect-ratio:9/6.4;overflow:hidden;background:var(--bg2);cursor:pointer}
+.pcard .ph img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.pcard:hover .ph img{transform:scale(1.045)}
+.pcard .in{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.pcard h3{font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.pcard .tg{font-size:12.5px;color:var(--mut);flex-grow:1}
+.pcard .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+.price{font-size:17px;font-weight:700}
+.stock{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:100px;background:var(--grn);color:#fff}
+.stock.low{background:#c8722e}
+.stock.zero{background:var(--red)}
+.buy{width:100%;margin-top:10px;background:var(--acc);color:#fff;border:0;border-radius:980px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;transition:transform .25s var(--ease),opacity .2s}
+.buy:hover{transform:scale(1.02)}
+.buy:active{transform:scale(.96)}
+.buy[disabled]{opacity:.28;cursor:not-allowed;transform:none}
 
-/* catalog */
-#catalog-list{margin-top:36px;display:flex;flex-direction:column;gap:14px}
-.crow{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;grid-template-columns:190px 1fr auto;gap:22px;align-items:center;transition:.2s}
-.crow:hover{border-color:#e0b06055}
-.cov{width:190px;border-radius:12px;border:1px solid var(--line);display:block}
-.crow .mid{min-width:0}
-.crow h3{font-size:17px;font-weight:600}
-.crow .tg{color:var(--mut);font-size:13.5px;margin-top:3px}
-.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
-.tags i{font-style:normal;font-size:11px;color:#c9c5bc;border:1px solid var(--line);border-radius:7px;padding:3px 9px;white-space:nowrap}
-.crow .r{text-align:right}
-.price{font-family:Georgia,serif;font-size:21px;color:var(--gold)}
-.from{font-size:12px;color:var(--mut)}
-.crow button{margin-top:10px;background:var(--gold);color:#141310;border:0;border-radius:10px;padding:10px 22px;font-weight:600;font-size:13.5px;cursor:pointer}
-.crow button:hover{background:var(--gold2)}
-@media(max-width:760px){.crow{grid-template-columns:1fr}.cov{width:100%}.crow .r{text-align:left;display:flex;align-items:center;gap:14px}}
+/* ритуал */
+.rit{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:36px}
+@media(max-width:860px){.rit{grid-template-columns:repeat(2,1fr)}}
+.rit a{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;display:block;transition:transform .35s var(--ease)}
+.rit a:hover{transform:translateY(-4px)}
+.rit .n{color:var(--rose);font-size:12px;font-weight:700;letter-spacing:1.5px}
+.rit b{display:block;font-size:16px;margin-top:8px;font-weight:600}
+.rit p{color:var(--mut);font-size:13px;margin-top:6px}
 
-/* author projects */
-.ap{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
-.ap a{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;display:block;transition:.25s}
-.ap a:hover{transform:translateY(-4px);border-color:#e0b06055}
-.ap .ic{font-size:30px}
-.ap b{display:block;font-family:Georgia,serif;font-weight:500;font-size:18px;margin-top:12px}
-.ap p{color:var(--mut);font-size:13.5px;margin-top:8px}
-.ap .go{display:inline-block;margin-top:14px;color:var(--gold);font-size:13px}
-@media(max-width:760px){.ap{grid-template-columns:1fr}}
+/* футер блоки */
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+@media(max-width:860px){.why{grid-template-columns:1fr}}
+.why div{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}
+.why b{font-size:16px;font-weight:600;display:block}
+.why p{color:var(--mut);font-size:13.5px;margin-top:8px}
 
-/* how */
-.how{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:36px}
-.how div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;font-size:13.5px;color:var(--mut)}
-.how b{display:block;font-family:Georgia,serif;color:var(--gold);font-size:15px;margin-bottom:8px;font-weight:600}
-@media(max-width:880px){.how{grid-template-columns:1fr 1fr}}
+footer{padding:44px 0 60px;color:var(--mut);font-size:12.5px;border-top:1px solid var(--line)}
+footer a{color:var(--tx)}
 
-/* cart drawer */
-#ovl{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:none}
-#ovl.show{display:block}
-#drawer{position:fixed;top:0;right:-430px;width:min(410px,100%);height:100%;background:var(--bg2);z-index:99;transition:right .3s ease;display:flex;flex-direction:column;border-left:1px solid var(--line)}
-#drawer.show{right:0}
-.dr-h{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-.dr-h b{font-family:Georgia,serif;font-size:19px}
-.dr-h button{background:none;border:0;color:var(--mut);font-size:26px;cursor:pointer;line-height:1}
-.dr-b{flex:1;overflow-y:auto;padding:18px 20px}
-.ci{border:1px solid var(--line);border-radius:13px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
-.ci .n{flex-grow:1;font-size:14px;font-weight:600}
-.ci .p{color:var(--mut);font-size:12.5px;margin-top:2px}
-.qbtn{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:none;color:var(--tx);font-size:16px;cursor:pointer}
-.qbtn:hover{background:#ffffff10}
-.qv{width:26px;text-align:center;font-weight:700}
-.dr-f{padding:18px 24px;border-top:1px solid var(--line)}
-.dr-t{display:flex;justify-content:space-between;font-size:18px;font-weight:700;margin-bottom:14px}
-.ck{display:block;width:100%;text-align:center;background:var(--gold);color:#141310;border:0;border-radius:12px;padding:15px;font-weight:700;font-size:15px;cursor:pointer}
-.ck:hover{background:var(--gold2)}
-.warn{margin-top:12px;font-size:12px;color:#c8a24e;border:1px solid #c8a24e44;border-radius:10px;padding:10px 12px;display:none}
-.warn.show{display:block}
-.empty{color:var(--mut);text-align:center;padding:60px 0}
-.empty a{color:var(--gold);text-decoration:underline}
+/* ---- drawer ---- */
+#ovl{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .35s;z-index:90}
+#ovl.show{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;right:0;width:min(400px,100%);height:100%;background:var(--bg);z-index:99;transform:translateX(105%);transition:transform .45s var(--ease);display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.12)}
+#drawer.show{transform:none}
+.dr-h{padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.dr-h b{font-size:17px}
+.dr-h button{background:none;border:0;font-size:22px;color:var(--mut);cursor:pointer;line-height:1}
+.dr-b{flex:1;overflow-y:auto;padding:16px 18px}
+.ci{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;animation:drop .35s var(--ease)}
+@keyframes drop{from{opacity:0;transform:translateY(10px)}to{opacity:1}}
+.ci img{width:58px;height:44px;object-fit:cover;border-radius:9px}
+.ci .n{flex:1;font-size:13.5px;font-weight:600;line-height:1.25}
+.ci .p{color:var(--mut);font-size:12px;margin-top:2px}
+.step{display:flex;align-items:center;gap:9px}
+.step button{width:27px;height:27px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:14px;cursor:pointer;transition:transform .2s}
+.step button:active{transform:scale(.85)}
+.step .qv{width:20px;text-align:center;font-weight:700;font-size:13.5px}
+.dr-f{padding:18px 22px;border-top:1px solid var(--line)}
+.dr-t{display:flex;justify-content:space-between;font-size:17px;font-weight:700;margin-bottom:12px}
+.ck{display:block;width:100%;text-align:center;background:var(--acc);color:#fff;border:0;border-radius:980px;padding:15px;font-weight:600;font-size:15px;cursor:pointer;transition:transform .25s var(--ease)}
+.ck:active{transform:scale(.97)}
+.stockwarn{margin-top:10px;font-size:12px;color:var(--red);display:none}
+.stockwarn.show{display:block}
+.empty{text-align:center;color:var(--mut);padding:66px 0}
+.empty a{color:var(--acc);text-decoration:underline}
+.hint{font-size:11.5px;color:var(--mut);margin-top:9px;text-align:center}
 
-footer{padding:56px 0 72px;text-align:center;color:var(--mut);font-size:14px;border-top:1px solid var(--line);margin-top:20px}
-footer a{color:var(--gold)}
+/* ---- reveal ---- */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.rv{transition:none;opacity:1;transform:none}}
 </style>
 </head>
 <body>
 
 <nav>
   <div class="nav-in">
-    <a class="brand" href="/"><b>AutoShop</b><span>portfolio</span></a>
+    <a class="brand" href="/">LUMÉ</a>
     <div class="nav-l">
-      <a href="#projects">Проекты</a>
-      <a href="#shop">Магазин</a>
-      <a href="#how">Как работает</a>
-      <a href="/tts.html">AI Call Center</a>
+      <a href="#catalog">Каталог</a>
+      <a href="#ritual">Как применять</a>
+      <a href="#why">Почему LUMÉ</a>
     </div>
-    <div class="nav-r">
-      <span id="stnav"><span class="dot"></span>статус бота…</span>
-      <button class="cart-btn" onclick="openCart()">🛒 Корзина<span class="nbadge" id="nbadge">0</span></button>
-    </div>
+    <button class="cart-btn" onclick="openCart()">Корзина
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="20" r="1.6"/><circle cx="17" cy="20" r="1.6"/><path d="M3 4h2l2.5 12h10L20 8H6"/></svg>
+      <span class="nbadge" id="nbadge">0</span>
+    </button>
   </div>
 </nav>
 
-<div class="wrap">
-  <div id="banner" class="off">
-    <span class="dot off" id="bdot"></span>
-    <span id="btxt">Проверяем статус бота…</span>
-    <button class="x" onclick="this.parentElement.hidden=true">×</button>
-  </div>
-</div>
+<div id="status"><span id="stpill" hidden><span class="dot pu" id="sdot"></span><span id="stxt"></span></span></div>
 
-<header class="wrap">
-  <div class="kick">товары — реальные работающие проекты</div>
-  <h1>Магазин, где каждый товар —<br><em>живая система</em>, а не презентация</h1>
-  <p class="lead">CRM, голосовой ИИ-оператор, Telegram-боты. Выберите проект, соберите корзину — бот доведёт до оплаты, примет её и спишет остаток. Без людей и звонков.</p>
-  <div class="cta">
-    <a class="btn-p" href="#shop">Выбрать проект</a>
-    <a class="btn-s" href="https://t.me/NexusDvBot" id="hero-bot">🤖 Открыть бота-консультанта</a>
+<header class="hero wrap">
+  <div class="kick rv">LUMÉ · уходовая косметика</div>
+  <h1 class="rv">Формулы, которым<br><span class="soft">доверяют кожу</span></h1>
+  <p class="lead rv">Сыворотки, SPF и ретинол в честных концентрациях. Живые остатки, доставка 24–48 часов, заказ — в один тап внутри Telegram.</p>
+  <div class="cta rv">
+    <a class="btn" href="#catalog">Смотреть каталог</a>
+    <a class="btn ghost" href="https://t.me/NexusDvBot" id="tglink">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161l-1.867 8.795c-.14.636-.51.79-1.033.492l-2.853-2.105-1.377 1.326c-.152.153-.28.281-.574.281l.204-2.899 5.285-4.773c.229-.203-.05-.317-.354-.114l-6.536 4.115-2.817-.88c-.612-.193-.625-.612.128-.905l11.01-4.248c.51-.193.956.117.784.905z"/></svg>
+      Заказ в Telegram
+    </a>
   </div>
-  <div class="stats">
-    <div><b>5</b><span>товаров = работающий код</span></div>
-    <div><b>7–10</b><span>дней внедрение</span></div>
-    <div><b>24/7</b><span>бот-консультант отвечает сам</span></div>
-    <div><b>0 ₽</b><span>инфраструктура сайта</span></div>
+  <div class="stats rv">
+    <div><b>8</b><span>формул · всё в наличии</span></div>
+    <div><b>24–48ч</b><span>доставка</span></div>
+    <div><b>14</b><span>дней на возврат</span></div>
+    <div><b>0</b><span>отдушек и спирта</span></div>
   </div>
 </header>
 
-<section id="projects">
+<section id="catalog">
   <div class="wrap">
-    <h2>Флагманы</h2>
-    <p class="sub">Три проекта открыты для изучения прямо здесь. Остальное — в каталоге ниже.</p>
-    <div class="feat">
-      <article>
-        <div class="ic">🧩</div>
-        <h3>Orbit CRM</h3>
-        <p>Канбан со сделками, задачи, дашборд KPI, роли и аудит, AI-ассистент. Full-stack на FastAPI + JWT.</p>
-        <img src="/img/crm-flow.svg" alt="Orbit CRM">
-        <div class="row">
-          <a class="demo-a" id="crm-demo" href="https://t.me/NexusDvBot?start=consult-orbit-crm">▶ Демо через бот</a>
-          <a class="buy-a" href="#" onclick="add('orbit-crm');return false">В корзину</a>
-        </div>
-      </article>
-      <article>
-        <div class="ic">🎙</div>
-        <h3>AI Call Center</h3>
-        <p>Голосовой оператор: XTTS v2 говорит, Whisper слушает, воронка звонка ведёт клиента к цели.</p>
-        <img src="/img/tts-hero.svg" alt="AI Call Center">
-        <div class="row">
-          <a class="demo-a" href="/tts.html">▶ Открыть витрину</a>
-          <a class="buy-a" href="#" onclick="add('tts');return false">В корзину</a>
-        </div>
-      </article>
-      <article>
-        <div class="ic">🛍</div>
-        <h3>AutoShop</h3>
-        <p>Этот магазин и есть продукт: GitHub Pages + бот, который сам синхронизирует остатки через GitHub API.</p>
-        <img src="/img/arch-mini.svg" alt="Архитектура AutoShop">
-        <div class="row">
-          <a class="demo-a" href="#how">▶ Как устроено</a>
-          <a class="buy-a" href="#" onclick="add('autoshop');return false">В корзину</a>
-        </div>
-      </article>
+    <div class="shead rv">
+      <div><h2>Каталог</h2><p class="sub">Количества обновляются при каждом заказе — их ведёт бот в реальном времени.</p></div>
+    </div>
+    <div class="grid" id="grid"><div style="color:var(--mut)">Загружаем каталог…</div></div>
+  </div>
+</section>
+
+<section id="ritual" style="background:var(--bg2)">
+  <div class="wrap">
+    <div class="shead rv"><div><h2>Как применять</h2><p class="sub">Четыре шага, каждый — ссылка на нужный продукт.</p></div></div>
+    <div class="rit rv">
+      <a href="#catalog" onclick="gof('balm')"><div class="n">ШАГ 0</div><b>Очищение</b><p>Бальзам тает в руках: снимает SPF и макияж за 60 секунд.</p></a>
+      <a href="#catalog" onclick="gof('toner')"><div class="n">ШАГ 1</div><b>Тонер · текстура</b><p>AHA/BHA вечером — гладкость, чистые поры.</p></a>
+      <a href="#catalog" onclick="gof('serum')"><div class="n">ШАГ 2</div><b>Сыворотки</b><p>Утро — витамин С, вечер — ретинол. Увлажнение всегда.</p></a>
+      <a href="#catalog" onclick="gof('spf50')"><div class="n">ШАГ 3</div><b>SPF · финал</b><p>50+ PA++++ без белых следов. Каждый день, без исключений.</p></a>
     </div>
   </div>
 </section>
 
-<section id="shop">
+<section id="why">
   <div class="wrap">
-    <h2>Каталог</h2>
-    <p class="sub">Оплата — разовая, без подписок. В цену входит внедрение и поддержка. Скидок нет — и это честно.</p>
-    <div id="catalog-list"><div class="crow"><div class="mid" style="color:var(--mut)">Загружаем каталог…</div></div></div>
-  </div>
-</section>
-
-<section id="how">
-  <div class="wrap">
-    <h2>Как работает автономность</h2>
-    <div class="how">
-      <div><b>1 · Выбор</b>Остатки лежат в репозитории сайта и обновляются сами.</div>
-      <div><b>2 · Корзина</b>На сайте (localStorage) или в чате бота.</div>
-      <div><b>3 · Передача</b>«Оплатить» кодирует корзину в стартовой ссылке бота.</div>
-      <div><b>4 · Оплата</b>Бот подтверждает заказ и принимает оплату.</div>
-      <div><b>5 · Списание</b>Остаток падает, журнал пишется, сайт обновляется.</div>
+    <div class="shead rv"><div><h2>Почему LUMÉ</h2><p class="sub">Никакой маркетинговой магии — только состав и честные числа.</p></div></div>
+    <div class="why rv">
+      <div><b>Концентрации на этикетке</b><p>3% гиалурона — значит 3%. Мы не прячем состав за словом «комплекс».</p></div>
+      <div><b>Остатки в реальном времени</b><p>Каждый заказ списывает позицию в каталоге: чего нет — того не предложат.</p></div>
+      <div><b>Возврат 14 дней</b><p>Не подошло по реакции — вернём деньги. Косметика не должна быть риском.</p></div>
     </div>
   </div>
 </section>
 
 <div id="ovl" onclick="closeCart()"></div>
 <aside id="drawer">
-  <div class="dr-h"><b>🛒 Корзина</b><button onclick="closeCart()">×</button></div>
+  <div class="dr-h"><b>Корзина</b><button onclick="closeCart()">×</button></div>
   <div class="dr-b" id="drbody"></div>
   <div class="dr-f" id="drfoot" style="display:none">
     <div class="dr-t"><span>Итого</span><span id="drtotal">0 ₽</span></div>
-    <a class="ck" href="#" id="ck">💳 Оплатить через Telegram</a>
-    <div class="warn" id="warn">⚠️ Бот сейчас офлайн, но корзина не пропадёт: Telegram сохранит ваше сообщение, и бот обработает его при следующем запуске.</div>
-    <p style="font-size:11px;color:var(--mut);margin-top:10px">Корзина передастся боту ссылкой — там останется подтвердить заказ.</p>
+    <button class="ck" id="ck" onclick="checkout()">Оформить в Telegram</button>
+    <div class="stockwarn" id="stockwarn"></div>
+    <p class="hint">Заказ откроется в чате бота прямо внутри Telegram — без выхода в браузер.</p>
   </div>
 </aside>
 
-<section id="author">
-  <div class="wrap">
-    <h2>Мои проекты — открыть и посмотреть</h2>
-    <p class="sub">За каждым товаром стоит моя живая работа: открытый код, витрины и демо.</p>
-    <div class="ap">
-      <a href="https://github.com/nwl01234/portfolio-app" target="_blank">
-        <div class="ic">👨‍💻</div><b>GitHub — код магазина</b>
-        <p>Сайт, бот, оплаты, синхронизация остатков — открыт в репозитории: смотри качество кода прямо сейчас.</p>
-        <span class="go">Открыть репозиторий →</span></a>
-      <a href="/tts.html">
-        <div class="ic">🎙</div><b>AI Call Center — витрина</b>
-        <p>Голосовой ИИ-оператор: архитектура, стек, возможности. Живой звонок — на созвоне перед оплатой.</p>
-        <span class="go">Открыть витрину →</span></a>
-      <a href="https://t.me/NexusDvBot?start=consult-orbit-crm" target="_blank">
-        <div class="ic">🧩</div><b>Orbit CRM — демо</b>
-        <p>Канбан, сделки, KPI-дашборд, AI-ассистент. Доступ к живому демо выдаёт бот за 1 вопрос.</p>
-        <span class="go">Запросить демо у бота →</span></a>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <p>AutoShop · сайт — <a href="https://github.com/nwl01234/portfolio-app">GitHub Pages</a> (код магазина открыт) · консультант — Telegram-бот без GPT, на базе знаний</p>
-  <p style="margin-top:10px">Всё, что здесь продаётся, я умею собирать и внедрять для вашего бизнеса.</p>
-</footer>
+<footer><div class="wrap">
+  LUMÉ · магазин запускается внутри Telegram&nbsp;·
+  <a href="https://t.me/NexusDvBot">@NexusDvBot</a> ·
+  <a href="https://github.com/nwl01234/portfolio-app">код магазина открыт</a> · возврат 14 дней
+</div></footer>
 
 <script>
-/* ---------- состояние ---------- */
-var PRODUCTS = [], ITEMS = {}, CFG = {bot_username:'NexusDvBot', crm_demo_url:''};
+/* ================= Telegram Mini App ================= */
+(function(){
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if (tg) {
+    tg.expand();
+    if (tg.setHeaderColor) { try { tg.setHeaderColor('#fbfbfd'); } catch(e){} }
+    if (tg.setBackgroundColor) { try { tg.setBackgroundColor('#fbfbfd'); } catch(e){} }
+  }
+})();
 
-/* ---------- каталог ---------- */
+var PRODUCTS = [], ITEMS = {}, STOCK = {}, S = 0;
 function money(n){ return n.toLocaleString('ru-RU') + ' ₽' }
 
-function renderCatalog(){
-  var host = document.getElementById('catalog-list');
-  host.innerHTML = '';
+/* ---------- каталог ---------- */
+function stockBadge(p){
+  var q = STOCK[p.id] != null ? STOCK[p.id] : p.qty;
+  if (q === 0) return '<span class="stock zero">Распродано</span>';
+  if (q <= 4)  return '<span class="stock low">Осталось ' + q + '</span>';
+  if (q <= 9)  return '<span class="stock low">Мало · ' + q + '</span>';
+  return '<span class="stock">В наличии ' + q + '</span>';
+}
+function renderGrid(){
+  var g = document.getElementById('grid'); g.innerHTML = '';
   PRODUCTS.forEach(function(p){
-    var row = document.createElement('div'); row.className = 'crow';
-    var feats = (p.features||[]).slice(0,3).map(function(f){return '<i>'+f+'</i>'}).join('');
-    var from = (p.unit==='от') ? 'от ' : '';
-    row.innerHTML =
-      '<a class="covwrap" href="https://t.me/NexusDvBot?start=consult-'+p.id+'"><img class="cov" src="/img/products/'+p.id+'.png" alt="'+p.name+'"></a>'+
-      '<div class="mid"><h3>'+p.name+'</h3><div class="tg">'+p.tagline+'</div><div class="tags">'+feats+'</div></div>'+
-      '<div class="r"><div><span class="from">'+from+'</span><span class="price">'+money(p.price)+'</span></div>'+
-      '<button onclick="add(\''+p.id+'\')">Купить</button><br><a href="https://t.me/NexusDvBot?start=consult-'+p.id+'" style="font-size:12px;color:var(--mut)">или спросить бота</a></div>';
-    host.appendChild(row);
+    var stock = STOCK[p.id] != null ? STOCK[p.id] : p.qty;
+    var c = document.createElement('article'); c.className = 'pcard rv';
+    c.innerHTML =
+      '<div class="ph" onclick="openCard(\''+p.id+'\')"><img src="/img/products/'+p.id+'.png" alt="'+p.name+'" loading="lazy"></div>'+
+      '<div class="in"><h3>'+p.name+'</h3><div class="tg">'+p.tagline+'</div>'+
+      '<div class="row"><span class="price">'+money(p.price)+'</span>'+stockBadge(p)+'</div>'+
+      '<button class="buy" '+(stock<=0?'disabled':'')+' onclick="add(\''+p.id+'\')">'+ (stock<=0?'Нет в наличии':'В корзину') +'</button></div>';
+    g.appendChild(c);
   });
+  reveal();
+}
+function openCard(id){ gof(id) }
+function gof(id){
+  var el = document.getElementById('card-'+id);
+  if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.style.boxShadow='0 0 0 3px var(--rose)'; setTimeout(function(){el.style.boxShadow=''}, 1600); }
 }
 
-/* ---------- корзина ---------- */
-function cartCount(){ var n=0; for(var k in ITEMS) n+=ITEMS[k]; return n }
-function cartTotal(){ var t=0; PRODUCTS.forEach(function(p){ t+=p.price*(ITEMS[p.id]||0) }); return t }
-
-function saveCart(){ try{ localStorage.setItem('as_cart', JSON.stringify(ITEMS)) }catch(e){} drawBadges() }
-
-function add(id){
+/* ---------- корзина + проверка остатков ---------- */
+function addItem(id, n){
   var p = PRODUCTS.find(function(x){return x.id===id}); if(!p) return;
-  ITEMS[id] = (ITEMS[id]||0)+1; saveCart(); renderCart(); openCart();
+  var stock = STOCK[p.id] != null ? STOCK[p.id] : p.qty;
+  var cur = ITEMS[id] || 0;
+  if (n > 0 && cur + n > stock) { flashStock(p, stock); return false; }
+  var v = cur + n;
+  if (v <= 0) delete ITEMS[id]; else ITEMS[id] = v;
+  save(); drawBadges(true); renderCart(); return true;
 }
-
-function drawBadges(){
-  var n = cartCount(), b = document.getElementById('nbadge');
+function add(id){ if(addItem(id, 1)) pulseCart() }
+function bump(id, d){ addItem(id, d) }
+function flashStock(p, stock){
+  renderCart();
+  var w = document.getElementById('stockwarn');
+  w.textContent = stock === 0 ? '«'+p.name+'» распродано.' : '«'+p.name+'»: на складе только '+stock+' шт.';
+  w.classList.add('show');
+  setTimeout(function(){ w.classList.remove('show') }, 3200);
+}
+function pulseCart(){
+  var b = document.getElementById('nbadge');
+  b.classList.add('pop'); setTimeout(function(){ b.classList.remove('pop') }, 260);
+}
+function drawBadges(pop){
+  var n = 0; for (var k in ITEMS) n += ITEMS[k];
+  var b = document.getElementById('nbadge');
   b.textContent = n; b.style.display = n ? 'flex' : 'none';
+  if (pop) { b.classList.add('pop'); setTimeout(function(){ b.classList.remove('pop') }, 260); }
 }
-
-function itemHtml(p){
-  return '<div class="ci"><div class="n">'+p.name+'<div class="p">'+money(p.price)+' × '+(ITEMS[p.id]||0)+'</div></div>'+
-    '<div><button class="qbtn" onclick="bump(\''+p.id+'\',-1)">−</button> <span class="qv">'+(ITEMS[p.id]||0)+'</span> '+
-    '<button class="qbtn" onclick="bump(\''+p.id+'\',1)">＋</button></div></div>';
-}
+function save(){ try{ localStorage.setItem('lume_cart', JSON.stringify(ITEMS)) }catch(e){} }
 
 function renderCart(){
   var body = document.getElementById('drbody'), foot = document.getElementById('drfoot');
-  var ids = PRODUCTS.filter(function(p){ return ITEMS[p.id] > 0 });
-  if(!ids.length){
-    body.innerHTML = '<div class="empty">Пока пусто. Загляните в <a href="#shop" onclick="closeCart()">каталог</a></div>';
+  var rows = PRODUCTS.filter(function(p){ return ITEMS[p.id] > 0 });
+  if (!rows.length){
+    body.innerHTML = '<div class="empty">Корзина пуста<br><a href="#catalog" onclick="closeCart()">К каталогу</a></div>';
     foot.style.display = 'none'; drawBadges(); return;
   }
-  body.innerHTML = ids.map(itemHtml).join('');
-  document.getElementById('drtotal').textContent = money(cartTotal());
-  var payload = 'ORD' + b64url(JSON.stringify({src:'site', items:ITEMS, at:Date.now()}));
-  document.getElementById('ck').href = 'https://t.me/' + (CFG.bot_username||'NexusDvBot') + '?start=' + payload;
-  var w = document.getElementById('warn');
-  if(BOT_STATUS === false) w.classList.add('show'); else w.classList.remove('show');
+  body.innerHTML = rows.map(function(p){
+    return '<div class="ci"><img src="/img/products/'+p.id+'.png">'+
+      '<div class="n">'+p.name+'<div class="p">'+money(p.price)+' × '+ITEMS[p.id]+'</div></div>'+
+      '<div class="step"><button onclick="bump(\''+p.id+'\',-1)">−</button><span class="qv">'+ITEMS[p.id]+'</span><button onclick="bump(\''+p.id+'\',1)">＋</button></div></div>';
+  }).join('');
+  var total = rows.reduce(function(s,p){ return s + p.price * ITEMS[p.id] }, 0);
+  document.getElementById('drtotal').textContent = money(total);
   foot.style.display = 'block'; drawBadges();
 }
-
-function bump(id, d){ var p=PRODUCTS.find(function(x){return x.id===id}); if(!p) return;
-  ITEMS[id]=(ITEMS[id]||0)+d; if(ITEMS[id]<=0){delete ITEMS[id]}
-  saveCart(); renderCart(); }
 
 function openCart(){ renderCart(); document.getElementById('drawer').classList.add('show'); document.getElementById('ovl').classList.add('show'); }
 function closeCart(){ document.getElementById('drawer').classList.remove('show'); document.getElementById('ovl').classList.remove('show'); }
 
-/* ---------- статус бота (бот пишет data/bot_status.json при запуске/остановке) ---------- */
-var BOT_STATUS = null;
+/* Оформление: свежая перепроверка остатков → deep-link в чат бота (внутри Telegram) */
+function checkout(){
+  var rows = PRODUCTS.filter(function(p){ return ITEMS[p.id] > 0 });
+  if (!rows.length) return;
+  fetch('/data/products.json', {cache:'no-store'}).then(function(r){ return r.json() }).then(function(d){
+    var broken = false;
+    rows.forEach(function(p){
+      var live = null;
+      (d.products || []).forEach(function(x){ if (x.id === p.id) live = x.qty });
+      if (live == null) live = STOCK[p.id] != null ? STOCK[p.id] : p.qty;
+      STOCK[p.id] = live;
+      if (ITEMS[p.id] > live) { ITEMS[p.id] = live; if (!live) delete ITEMS[p.id]; broken = true; }
+    });
+    if (broken){
+      renderGrid(); renderCart();
+      var w = document.getElementById('stockwarn');
+      w.textContent = 'Остаток изменился — корзину пересобрали по актуальным остаткам.';
+      w.classList.add('show'); setTimeout(function(){ w.classList.remove('show') }, 3600);
+      if (!rows.some(function(p){ return ITEMS[p.id] > 0 })) return;
+    }
+    var payload = 'ORD' + b64url(JSON.stringify({src:'site', items:ITEMS, at:Date.now()}));
+    var url = 'https://t.me/' + (BOT_USER || 'NexusDvBot') + '?start=' + payload;
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if (tg && tg.openTelegramLink) tg.openTelegramLink(url);   /* внутри Telegram */
+    else location.href = url;
+  });
+}
+
+var BOT_USER = 'NexusDvBot';
+function b64url(s){
+  return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+/* ---------- статус бота ---------- */
 function setStatus(online){
-  BOT_STATUS = online;
-  var bn = document.getElementById('banner'), bd = document.getElementById('bdot'), bt = document.getElementById('btxt');
-  var sn = document.getElementById('stnav');
-  if(online === true){
-    bn.className='on'; bd.className='dot on';
-    bt.innerHTML = '<b>Бот на связи.</b> Консультант отвечает прямо сейчас — спросите что угодно о проектах.';
-    sn.innerHTML = '<span class="dot on"></span>бот на связи';
-  }else{
-    bn.className='off'; bd.className='dot off';
-    bt.innerHTML = '<b>Бот сейчас офлайн.</b> Корзины и сообщения не теряются: Telegram хранит их, и бот всё обработает, как только включат.';
-    sn.innerHTML = '<span class="dot off"></span>бот офлайн';
-  }
+  var pill = document.getElementById('stpill'), dot = document.getElementById('sdot'), t = document.getElementById('stxt');
+  pill.hidden = false;
+  if (online === true){ dot.className = 'dot pu'; t.textContent = 'Приём заказов открыт · бот отвечает в чате'; }
+  else { dot.className = 'dot off'; t.textContent = 'Приём заказов временно закрыт · вернитесь чуть позже'; }
 }
 function pollStatus(){
-  var t = Date.now();
-  fetch('/data/bot_status.json?_=' + t, {cache:'no-store'})
+  fetch('/data/bot_status.json?_=' + Date.now(), {cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null })
     .then(function(d){ setStatus(d ? !!d.online : false) })
     .catch(function(){ setStatus(false) });
 }
 
-/* ---------- утилиты ---------- */
-function b64url(s){
-  return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+/* ---------- reveal ---------- */
+function reveal(){
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target) } });
+  }, {threshold:.12});
+  document.querySelectorAll('.rv:not(.in)').forEach(function(el){ io.observe(el) });
 }
 
 /* ---------- init ---------- */
 (function(){
-  fetch('/data/products.json', {cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
-    PRODUCTS = d.products; renderCatalog();
-  }).catch(function(){
-    document.getElementById('catalog-list').innerHTML = '<div class="crow"><div class="mid">Каталог временно недоступен — откройте <a href="https://t.me/NexusDvBot" style="color:var(--gold)">бота</a>.</div></div>';
-  });
-  try{ ITEMS = JSON.parse(localStorage.getItem('as_cart')||'{}') }catch(e){ ITEMS={} }
+  fetch('/data/products.json', {cache:'no-store'})
+    .then(function(r){ return r.json() })
+    .then(function(d){
+      PRODUCTS = d.products || [];
+      PRODUCTS.forEach(function(p){ STOCK[p.id] = p.qty });
+      renderGrid();
+    })
+    .catch(function(){
+      document.getElementById('grid').innerHTML = '<div style="color:var(--mut)">Каталог временно недоступен — заказайте через <a href="https://t.me/NexusDvBot" style="color:var(--acc)">бота</a>.</div>';
+    });
+  try { ITEMS = JSON.parse(localStorage.getItem('lume_cart')||'{}') } catch(e){ ITEMS = {} }
   drawBadges();
-  fetch('/data/config.json', {cache:'no-store'}).then(function(r){return r.json()}).then(function(c){
-    CFG = Object.assign(CFG, c);
-    if(CFG.bot_username){ document.getElementById('hero-bot').href = 'https://t.me/' + CFG.bot_username;
-      var cd = document.getElementById('crm-demo');
-      if(CFG.crm_demo_url) cd.href = CFG.crm_demo_url;
-    }
+  fetch('/data/config.json', {cache:'no-store'}).then(function(r){ return r.json() }).then(function(c){
+    if (c && c.bot_username) { BOT_USER = c.bot_username; document.getElementById('tglink').href = 'https://t.me/' + c.bot_username; }
   }).catch(function(){});
   pollStatus(); setInterval(pollStatus, 60000);
 })();
