@@ -1,0 +1,10 @@
+.env
+data/sales.db*
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+node_modules/
+.DS_Store
+Thumbs.db

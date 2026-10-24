@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoShop Portfolio — магазин с живыми ИИ-проектами</title>
+<meta name="description" content="Автономный магазин-портфолио: Telegram-бот, CRM для отдела продаж, голосовой ИИ-оператор. Товары — реальные работающие проекты, демо запускается из магазина.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { ink:'#0b0b14', card:'#12121f', neon:'#7c5cff', mint:'#3bf0c2', gold:'#ffc86b' },
+  fontFamily: { sans:['Inter','ui-sans-serif','system-ui'], mono:['JetBrains Mono','monospace'] },
+  boxShadow: { glow:'0 0 40px rgba(124,92,255,.35)' },
+}}}
+</script>
+<style>
+  body{background:radial-gradient(1000px 500px at 80% -10%, #241a5e66, transparent),radial-gradient(800px 400px at -10% 30%, #0d3b3e55, transparent), #0b0b14;}
+  .grad-txt{background:linear-gradient(92deg,#7c5cff,#3bf0c2 60%,#ffc86b);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .glass{background:rgba(255,255,255,.045);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.09)}
+  .lift{transition:transform .25s ease, box-shadow .25s ease}
+  .lift:hover{transform:translateY(-6px);box-shadow:0 16px 60px rgba(124,92,255,.25)}
+  .fade-up{animation:fu .7s ease both}@keyframes fu{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+  .pulse{animation:pd 1.8s infinite}@keyframes pd{0%,100%{opacity:1}50%{opacity:.35}}
+  [x-cloak]{display:none!important}
+</style>
+</head>
+<body class="text-zinc-200 font-sans antialiased" x-data="shop()" x-init="init()">
+
+<nav class="sticky top-0 z-40 glass">
+  <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+    <a href="#top" class="font-bold text-lg tracking-tight">Auto<span class="grad-txt">Shop</span> <span class="text-xs text-zinc-500 ml-1">portfolio</span></a>
+    <div class="hidden md:flex gap-7 text-sm text-zinc-400">
+      <a href="#projects" class="hover:text-white transition">Проекты</a>
+      <a href="#shop" class="hover:text-white transition">Магазин</a>
+      <a href="#how" class="hover:text-white transition">Как работает</a>
+    </div>
+    <button @click="openCart()" class="relative px-4 py-2 rounded-xl bg-neon/20 border border-neon/40 text-sm hover:bg-neon/30 transition">
+      🛒 Корзина
+      <span x-show="count()" x-cloak x-text="count()" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-mint text-ink text-[11px] font-bold grid place-items-center"></span>
+    </button>
+  </div>
+</nav>
+
+<header id="top" class="max-w-6xl mx-auto px-5 pt-20 pb-14 text-center">
+  <div class="inline-flex items-center gap-2 text-xs text-mint border border-mint/30 rounded-full px-4 py-1.5 mb-7 fade-up">
+    <span class="w-2 h-2 rounded-full bg-mint pulse"></span> товары — реальные работающие проекты
+  </div>
+  <h1 class="text-4xl md:text-6xl font-extrabold leading-tight fade-up">Магазин, где товары —<br><span class="grad-txt">живые ИИ-проекты</span></h1>
+  <p class="mt-6 text-zinc-400 max-w-2xl mx-auto text-lg fade-up">Не «развёртка со скриншотами»: выбери проект в каталоге, собери корзину — и Telegram-бот доведёт до оплаты, примет её и спишет остаток сам. Демо запускается из магазина.</p>
+  <div class="mt-9 flex flex-wrap gap-4 justify-center fade-up">
+    <a href="#shop" class="px-7 py-3.5 rounded-xl bg-gradient-to-r from-neon to-[#5e3fff] font-semibold text-white shadow-glow hover:brightness-110 transition">🛍 В магазин</a>
+    <a :href="botUrl()" class="px-7 py-3.5 rounded-xl glass hover:bg-white/10 transition font-semibold">🤖 Открыть Telegram-бот</a>
+  </div>
+  <div class="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="glass rounded-2xl p-5 lift"><div class="text-2xl font-extrabold grad-txt">5</div><div class="text-xs text-zinc-400 mt-1">товаров = работающий код</div></div>
+    <div class="glass rounded-2xl p-5 lift"><div class="text-2xl font-extrabold grad-txt">59s</div><div class="text-xs text-zinc-400 mt-1">средний путь карточка → заказ</div></div>
+    <div class="glass rounded-2xl p-5 lift"><div class="text-2xl font-extrabold grad-txt">24/7</div><div class="text-xs text-zinc-400 mt-1">AI-консультант в боте</div></div>
+    <div class="glass rounded-2xl p-5 lift"><div class="text-2xl font-extrabold grad-txt">0 ₽</div><div class="text-xs text-zinc-400 mt-1">инфраструктура сайта</div></div>
+  </div>
+</header>
+
+<section id="projects" class="max-w-6xl mx-auto px-5 py-14">
+  <h2 class="text-3xl font-bold">Флагманские проекты <span class="text-zinc-500 text-lg font-normal">— можно запустить прямо здесь</span></h2>
+  <div class="mt-8 grid md:grid-cols-3 gap-6">
+    <div class="glass rounded-3xl p-6 lift fade-up flex flex-col">
+      <div class="text-4xl">🧩</div>
+      <h3 class="mt-4 font-bold text-lg">Orbit CRM</h3>
+      <p class="mt-2 text-sm text-zinc-400 grow">Полноценная CRM: канбан, сделки, задачи, отчёты, AI-ассистент. FastAPI + SQLite + JWT + Alpine.</p>
+      <img src="/img/crm-flow.svg" alt="Orbit CRM интерфейс" class="mt-4 rounded-xl border border-white/10">
+      <div class="mt-5 flex gap-3">
+        <a :href="cfg.crm_demo_url ? cfg.crm_demo_url : botUrl('consult-orbit-crm')" target="_blank" class="flex-1 text-center px-4 py-2.5 rounded-xl bg-neon/25 border border-neon/50 text-sm font-semibold hover:bg-neon/40 transition" x-text="cfg.crm_demo_url ? '▶ Живое демо' : '▶ Демо через бот'"></a>
+        <button @click="add('orbit-crm'); openCart()" class="px-4 py-2.5 rounded-xl bg-mint/15 border border-mint/40 text-sm hover:bg-mint/25 transition">В корзину</button>
+      </div>
+    </div>
+    <div class="glass rounded-3xl p-6 lift fade-up flex flex-col">
+      <div class="text-4xl">🎙</div>
+      <h3 class="mt-4 font-bold text-lg">AI Call Center</h3>
+      <p class="mt-2 text-sm text-zinc-400 grow">Голосовой ИИ-оператор: XTTS v2 + Whisper, воронка звонка, база сессий. Витрина с деталями — внутри.</p>
+      <img src="/img/tts-hero.svg" alt="AI Call Center" class="mt-4 rounded-xl border border-white/10">
+      <div class="mt-5 flex gap-3">
+        <a href="/tts.html" class="flex-1 text-center px-4 py-2.5 rounded-xl bg-neon/25 border border-neon/50 text-sm font-semibold hover:bg-neon/40 transition">▶ Открыть витрину</a>
+        <button @click="add('tts'); openCart()" class="px-4 py-2.5 rounded-xl bg-mint/15 border border-mint/40 text-sm hover:bg-mint/25 transition">В корзину</button>
+      </div>
+    </div>
+    <div class="glass rounded-3xl p-6 lift fade-up flex flex-col">
+      <div class="text-4xl">🛍</div>
+      <h3 class="mt-4 font-bold text-lg">AutoShop — этот магазин</h3>
+      <p class="mt-2 text-sm text-zinc-400 grow">Магазин сам является проектом: премиальный фронт на GitHub Pages + Telegram-бот, синхронизирующий остатки в репозиторий через GitHub API.</p>
+      <img src="/img/arch-mini.svg" alt="Схема" class="mt-4 rounded-xl border border-white/10">
+      <div class="mt-5 flex gap-3">
+        <a href="#how" class="flex-1 text-center px-4 py-2.5 rounded-xl bg-neon/25 border border-neon/50 text-sm font-semibold hover:bg-neon/40 transition">▶ Как устроено</a>
+        <button @click="add('autoshop'); openCart()" class="px-4 py-2.5 rounded-xl bg-mint/15 border border-mint/40 text-sm hover:bg-mint/25 transition">В корзину</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="shop" class="max-w-6xl mx-auto px-5 py-14">
+  <h2 class="text-3xl font-bold">Каталог</h2>
+  <p class="mt-3 text-zinc-400">Кнопка «Купить» собирает корзину → открывает Telegram-бота с твоей корзиной → бот оформляет и принимает оплату. Оплата — точка интеграции любого платёжного провайдера.</p>
+  <div class="mt-8 space-y-4">
+    <template x-for="p in products" :key="p.id">
+      <div class="glass rounded-2xl p-5 md:flex items-center gap-6 lift">
+        <div class="text-4xl md:w-14 text-center" x-text="p.emoji"></div>
+        <div class="mt-4 md:mt-0 grow">
+          <h3 class="font-semibold" x-text="p.name"></h3>
+          <p class="text-sm text-zinc-400 mt-1" x-text="p.tagline"></p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <template x-for="f in p.features.slice(0,3)"><span class="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-zinc-300" x-text="f"></span></template>
+          </div>
+        </div>
+        <div class="mt-4 md:mt-0 flex items-center gap-4">
+          <span class="text-xs px-3 py-1.5 rounded-lg border" :class="p.qty>0 ? 'border-mint/40 text-mint' : 'border-red-400/40 text-red-300'" x-text="p.qty>0 ? '📦 в наличии: '+p.qty : 'нет в наличии'"></span>
+          <span class="font-bold text-gold" x-text="p.price+' ₽ '+p.unit"></span>
+          <button @click="add(p.id); openCart()" :disabled="p.qty<=0" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-neon to-[#5e3fff] text-white text-sm font-semibold hover:brightness-110 transition disabled:opacity-30 disabled:cursor-not-allowed">Купить</button>
+        </div>
+      </div>
+    </template>
+  </div>
+</section>
+
+<section id="how" class="max-w-6xl mx-auto px-5 py-14">
+  <h2 class="text-3xl font-bold">Как устроена автономность</h2>
+  <div class="mt-8 grid md:grid-cols-5 gap-4 text-sm">
+    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">1 · Выбор</div><p class="mt-2 text-zinc-400">Остатки лежат в репозитории сайта; бот держит их синхронно через GitHub API.</p></div>
+    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">2 · Корзина</div><p class="mt-2 text-zinc-400">Собирается на сайте (localStorage) или в чате бота (FSM).</p></div>
+    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">3 · Передача</div><p class="mt-2 text-zinc-400">«Оплатить» кодирует корзину в ссылке-начале бота — бот уже всё знает.</p></div>
+    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">4 · Оплата</div><p class="mt-2 text-zinc-400">Бот подтверждает заказ и принимает оплату (демо / провайдер).</p></div>
+    <div class="glass rounded-2xl p-5 lift"><div class="grad-txt font-bold">5 · Списание</div><p class="mt-2 text-zinc-400">Остаток падает, журнал продаж пишется, сайт обновляется сам.</p></div>
+  </div>
+</section>
+
+<!-- CART -->
+<div x-show="cartOpen" x-cloak class="fixed inset-0 z-50" @keydown.escape.window="cartOpen=false">
+  <div class="absolute inset-0 bg-black/70" @click="cartOpen=false"></div>
+  <aside class="absolute right-0 top-0 h-full w-full max-w-md glass p-6 overflow-y-auto">
+    <div class="flex justify-between items-center">
+      <h3 class="text-xl font-bold">🛒 Корзина</h3>
+      <button @click="cartOpen=false" class="text-zinc-400 hover:text-white text-2xl leading-none">×</button>
+    </div>
+    <template x-for="p in products" :key="p.id">
+      <div x-show="qty(p.id)>0" class="mt-5 glass rounded-xl p-4 flex items-center gap-4">
+        <div class="grow"><div class="font-semibold text-sm" x-text="p.name"></div><div class="text-xs text-zinc-400 mt-1" x-text="p.price+' ₽ × '+qty(p.id)"></div></div>
+        <div class="flex items-center gap-2">
+          <button @click="dec(p.id)" class="w-8 h-8 rounded-lg glass hover:bg-white/10">−</button>
+          <span x-text="qty(p.id)" class="w-6 text-center font-bold"></span>
+          <button @click="inc(p.id)" class="w-8 h-8 rounded-lg glass hover:bg-white/10">＋</button>
+        </div>
+      </div>
+    </template>
+    <div x-show="count()>0" class="mt-6">
+      <div class="flex justify-between text-lg font-bold"><span>Итого</span><span x-text="total()+' ₽'"></span></div>
+      <button @click="checkout()" class="mt-5 w-full py-3.5 rounded-xl bg-gradient-to-r from-neon to-[#5e3fff] font-bold text-white shadow-glow hover:brightness-110 transition">💳 Оплатить через Telegram</button>
+      <p class="text-[11px] text-zinc-500 mt-3">Корзина передастся боту ссылкой — там останется подтвердить и оплатить.</p>
+    </div>
+    <div x-show="!count()" class="mt-16 text-center text-zinc-500">Пусто. Загляни в <a href="#shop" class="text-mint" @click="cartOpen=false">каталог</a> 👀</div>
+  </aside>
+</div>
+
+<footer class="max-w-6xl mx-auto px-5 py-16 text-center text-sm text-zinc-500">
+  <p>AutoShop Portfolio · GitHub Pages + Telegram-бот (GitHub API sync) · AI: любой OpenAI-совместимый API</p>
+  <p class="mt-2">Всё, что здесь продаётся, я умею делать для вашего бизнеса 💼</p>
+</footer>
+
+<script>
+function shop(){
+  return {
+    products: [], items: {}, cartOpen: false, cfg: {bot_username:'NexusDvBot', crm_demo_url:''},
+    async init(){
+      try{ const c = await (await fetch('/data/config.json')).json(); this.cfg = {...this.cfg, ...c} }catch{}
+      try{ const d = await (await fetch('/data/products.json')).json(); this.products = d.products }catch(e){ console.error(e) }
+      try{ this.items = JSON.parse(localStorage.getItem('as_cart')||'{}') }catch{ this.items={} }
+    },
+    qty(id){ return this.items[id]||0 },
+    count(){ return Object.values(this.items).reduce((s,n)=>s+n,0) },
+    total(){ return this.products.reduce((s,p)=>s+(p.price*(this.items[p.id]||0)),0) },
+    add(id){ const p=this.products.find(x=>x.id===id); if(!p||this.qty(id)>=p.qty) return; this.items[id]=this.qty(id)+1; this.save() },
+    inc(id){ this.add(id) },
+    dec(id){ if(this.items[id]){ this.items[id]--; if(!this.items[id]) delete this.items[id]; this.save() } },
+    save(){ localStorage.setItem('as_cart', JSON.stringify(this.items)) },
+    openCart(){ this.cartOpen=true },
+    botUrl(payload){
+      const start = payload ? '?start='+btoa(unescape(encodeURIComponent(payload))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'') : '';
+      return 'https://t.me/'+(this.cfg.bot_username||'NexusDvBot')+start;
+    },
+    checkout(){
+      const payload = 'ORD'+btoa(unescape(encodeURIComponent(JSON.stringify({
+        src:'site', items:this.items, at:Date.now()
+      })))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      location.href = this.botUrl(payload);
+    }
+  }
+}
+</script>
+</body>
+</html>

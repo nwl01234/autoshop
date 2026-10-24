@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300">
+  <defs><linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10122c"/><stop offset="1" stop-color="#0b0b14"/></linearGradient></defs>
+  <rect width="900" height="300" rx="22" fill="url(#bg3)"/>
+  <g font-family="Segoe UI, Arial" font-size="15">
+    <rect x="50" y="50" width="380" height="200" rx="14" fill="#12142e" stroke="#ffffff20"/>
+    <text x="70" y="85" fill="#c9c9ea" font-weight="700">Orbit CRM · Канбан сделок</text>
+    <rect x="70" y="105" width="108" height="120" rx="10" fill="#1b1d45"/><text x="80" y="125" fill="#8d93c7" font-size="12">Новые · 4</text>
+    <rect x="78" y="140" width="92" height="34" rx="8" fill="#7c5cff55"/><text x="86" y="162" fill="#e6e6f5" font-size="12">ООО Ромашка</text>
+    <rect x="78" y="180" width="92" height="34" rx="8" fill="#7c5cff55"/><text x="86" y="202" fill="#e6e6f5" font-size="12">ИП Петров</text>
+    <rect x="186" y="105" width="108" height="120" rx="10" fill="#1b1d45"/><text x="196" y="125" fill="#8d93c7" font-size="12">В работе · 2</text>
+    <rect x="194" y="140" width="92" height="34" rx="8" fill="#3bf0c255"/><text x="202" y="162" fill="#e6e6f5" font-size="12">Технолайт</text>
+    <rect x="194" y="180" width="92" height="34" rx="8" fill="#3bf0c255"/><text x="202" y="202" fill="#e6e6f5" font-size="12">Атлас Групп</text>
+    <rect x="302" y="105" width="108" height="120" rx="10" fill="#1b1d45"/><text x="312" y="125" fill="#8d93c7" font-size="12">Выиграно · 1</text>
+    <rect x="310" y="140" width="92" height="34" rx="8" fill="#ffc86b55"/><text x="318" y="162" fill="#e6e6f5" font-size="12">ProSell ↑ 84k ₽</text>
+    <rect x="460" y="50" width="390" height="200" rx="14" fill="#12142e" stroke="#ffffff20"/>
+    <text x="480" y="85" fill="#c9c9ea" font-weight="700">Дашборд KPI</text>
+    <rect x="480" y="105" width="112" height="60" rx="10" fill="#1b1d45"/><text x="494" y="132" fill="#3bf0c2" font-size="20" font-weight="700">38%</text><text x="494" y="152" fill="#8d93c7" font-size="11">win rate</text>
+    <rect x="604" y="105" width="112" height="60" rx="10" fill="#1b1d45"/><text x="618" y="132" fill="#7c5cff" font-size="20" font-weight="700">12.4д</text><text x="618" y="152" fill="#8d93c7" font-size="11">цикл сделки</text>
+    <rect x="728" y="105" width="112" height="60" rx="10" fill="#1b1d45"/><text x="742" y="132" fill="#ffc86b" font-size="20" font-weight="700">1.2M</text><text x="742" y="152" fill="#8d93c7" font-size="11">pipeline ₽</text>
+    <text x="480" y="195" fill="#8d93c7" font-size="12">AI-ассистент: «Сделка Технолайт — просрочка. Отправить follow-up?»</text>
+    <text x="494" y="212" fill="#e6e6f5" font-size="12">[Да] → заявка подписана ×</text>
+    <text x="480" y="235" fill="#3bf0c2" font-size="12">✓ follow-up отправлен, задача создана</text>
+  </g>
+</svg>

@@ -1,0 +1,7 @@
+# Бот + сайт
+aiogram==3.*
+httpx==0.*
+python-dotenv==1.*
+
+# Тесты
+pytest==8.*
