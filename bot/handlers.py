@@ -58,25 +58,31 @@ def demo_url(pid: str) -> str:
 
 # ---------------- тексты витрин ----------------
 
+def price_str(p: dict) -> str:
+    """от 15 000 ₽ · внедрение — услуги без остатков."""
+    pre = "от " if p.get("unit") == "от" else ""
+    return f"{pre}{p['price']:,} ₽".replace(",", " ")
+
+
 def catalog_text() -> str:
-    lines = ["🛍 <b>Каталог</b> — товары здесь это реальные работающие проекты:\n"]
+    lines = ["🛍 <b>Каталог</b> — каждый товар это работающая система:\n"]
     for p in storage.products():
-        lines.append(f"{p['emoji']} <b>{esc(p['name'])}</b> · {p['price']} ₽ · 📦 {local_stock()[p['id']]}")
+        lines.append(f"{p['emoji']} <b>{esc(p['name'])}</b> — {price_str(p)}")
     return "\n".join(lines)
 
 
 def catalog_kb() -> InlineKeyboardMarkup:
     rows = [[btn(f"{p['emoji']} {p['name']}", f"prod:{p['id']}")] for p in storage.products()]
+    rows.append([btn("🏪 Открыть магазин (сайт)", url=site_base())])
     rows.append([btn("🛒 Корзина", "act:cart"), btn("🏠 Меню", "act:menu")])
     return kb(rows)
 
 
 def product_text(pid: str) -> str:
     p = storage.product(pid)
-    q = local_stock()[pid]
     feats = "\n".join(f"  ✦ {esc(f)}" for f in p["features"])
-    return (f"{p['emoji']} <b>{esc(p['name'])}</b>\n\n{esc(p['tagline'])}\n\n{feats}\n\n"
-            f"💵 Цена: <b>{p['price']} ₽ {esc(p['unit'])}</b>\n📦 В наличии: <b>{q}</b>")
+    return (f"<b>{esc(p['name'])}</b>\n\n{esc(p['tagline'])}\n\n{feats}\n\n"
+            f"💵 Стоимость: <b>{price_str(p)}</b> — разовая, внедрение и поддержка включены.")
 
 
 def product_kb(pid: str) -> InlineKeyboardMarkup:
@@ -88,23 +94,28 @@ def product_kb(pid: str) -> InlineKeyboardMarkup:
     elif d.get("type") == "url" and demo_url(pid).startswith("http"):
         rows.append([btn("▶️ Запустить живое демо", url=demo_url(pid))])
     elif d.get("type") == "url":
-        rows.append([btn("▶️ Демо — открывается после настройки", f"demo:{pid}")])
-    if pid in ("tgbot", "ai-int"):
-        rows.append([btn("📝 Обсудить мою задачу", f"consult:{pid}")])
+        rows.append([btn("▶️ Демо — запросить показ", f"demo:{pid}")])
+    rows.append([btn("🏪 Весь магазин (сайт)", url=site_base())])
     rows.append([btn("⬅️ Каталог", "act:catalog"), btn("🏠 Меню", "act:menu")])
     return kb(rows)
 
 
+def product_card(pid: str) -> str:
+    """URL обложки товара для фото-карточки (публичная страница Pages)."""
+    return f"{site_base()}/img/products/{pid}.png"
+
+
 def menu_kb() -> InlineKeyboardMarkup:
     return kb([
-        [btn("🛍 Каталог", "act:catalog"), btn("🚀 Проекты", "act:demos")],
-        [btn("🛒 Корзина", "act:cart"), btn("❓ Помощь", "act:help")],
+        [btn("🏪 Открыть магазин", url=site_base()), btn("🛍 Каталог", "act:catalog")],
+        [btn("🚀 Мои проекты", "act:demos"), btn("🛒 Корзина", "act:cart")],
+        [btn("❓ Помощь", "act:help")],
     ])
 
 
 def fallback_kb() -> InlineKeyboardMarkup:
     return kb([
-        [btn("🛍 Каталог", "act:catalog"), btn("🚀 Проекты", "act:demos")],
+        [btn("🏪 Открыть магазин", url=site_base()), btn("🛍 Каталог", "act:catalog")],
         [btn("💬 Опишу свою задачу", "act:free")],
     ])
 
@@ -205,19 +216,27 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
         return await A()
 
     if d == "act:demos":
-        txt = ("🚀 <b>Мои проекты</b>:\n\n"
-               "🧩 <b>Orbit CRM</b> — полноценная CRM: канбан, сделки, отчёты, AI-ассистент.\n"
-               "🎙 <b>AI Call Center</b> — голосовой ИИ-оператор для бизнеса.\n"
-               "🛍 <b>AutoShop</b> — этот магазин сам является проектом.")
-        rows = []
+        txt = ("🚀 <b>Мои проекты</b> — открываются прямо сейчас:\n\n"
+               "👨‍💻 <b>GitHub</b> — код магазина открыт.\n"
+               "🎙 <b>AI Call Center</b> — витрина голосового оператора.\n"
+               "🧩 <b>Orbit CRM</b> — канбан, сделки, KPI, AI-ассистент.\n"
+               "🏪 <b>Магазин</b> — каталог с обложками и корзиной.")
+        rows = [
+            [btn("👨‍💻 Открыть GitHub (код)", url="https://github.com/nwl01234/portfolio-app")],
+            [btn("🎨 Витрина AI Call Center", url=f"{site_base()}/tts.html")],
+            [btn("🏪 Открыть магазин", url=site_base())],
+        ]
         if demo_url("orbit-crm").startswith("http"):
             rows.append([btn("▶️ Живое демо Orbit CRM", url=demo_url("orbit-crm"))])
         else:
-            rows.append([btn("🧩 CRM — демо по запросу", "demo:orbit-crm")])
-        rows.append([btn("🎨 Витрина AI Call Center", url=f"{site_base()}/tts.html")])
+            rows.append([btn("🧩 CRM — запросить живой показ", "demo:orbit-crm")])
         rows.append([btn("🏠 Меню", "act:menu")])
         await m.edit_text(txt, reply_markup=kb(rows))
         return await A()
+
+    if d == "act:cart":
+        await A()
+        return await cart_view(m, cq.from_user.id)
 
     if d == "act:help":
         await m.edit_text(
@@ -237,7 +256,13 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
 
     if d.startswith("prod:"):
         pid = d.split(":")[1]
-        await m.edit_text(product_text(pid), reply_markup=product_kb(pid))
+        try:
+            await m.answer_photo(photo=product_card(pid),
+                                 caption=product_text(pid),
+                                 reply_markup=product_kb(pid))
+        except Exception:
+            # обложка недоступна → текстовая карточка
+            await m.edit_text(product_text(pid), reply_markup=product_kb(pid))
         return await A()
 
     if d.startswith("add:"):

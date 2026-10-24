@@ -90,23 +90,30 @@ h2{font-family:Georgia,serif;font-weight:500;font-size:32px}
 
 /* catalog */
 #catalog-list{margin-top:36px;display:flex;flex-direction:column;gap:14px}
-.crow{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 26px;display:flex;align-items:center;gap:22px;transition:.2s}
-.crow:hover{border-color:#ffffff2a}
-.crow .e{font-size:30px;width:44px;text-align:center;flex-shrink:0}
-.crow .mid{flex-grow:1;min-width:0}
+.crow{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;grid-template-columns:190px 1fr auto;gap:22px;align-items:center;transition:.2s}
+.crow:hover{border-color:#e0b06055}
+.cov{width:190px;border-radius:12px;border:1px solid var(--line);display:block}
+.crow .mid{min-width:0}
 .crow h3{font-size:17px;font-weight:600}
 .crow .tg{color:var(--mut);font-size:13.5px;margin-top:3px}
 .tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .tags i{font-style:normal;font-size:11px;color:#c9c5bc;border:1px solid var(--line);border-radius:7px;padding:3px 9px;white-space:nowrap}
-.crow .r{text-align:right;flex-shrink:0}
+.crow .r{text-align:right}
 .price{font-family:Georgia,serif;font-size:21px;color:var(--gold)}
-.unit{font-size:12px;color:var(--mut)}
-.qty-chip{display:inline-block;font-size:12px;color:var(--grn);margin-top:4px}
-.qty-chip.zero{color:#d76b5d}
+.from{font-size:12px;color:var(--mut)}
 .crow button{margin-top:10px;background:var(--gold);color:#141310;border:0;border-radius:10px;padding:10px 22px;font-weight:600;font-size:13.5px;cursor:pointer}
 .crow button:hover{background:var(--gold2)}
-.crow button:disabled{opacity:.25;cursor:not-allowed}
-@media(max-width:760px){.crow{flex-wrap:wrap}.crow .r{text-align:left;width:100%;display:flex;align-items:center;gap:14px}}
+@media(max-width:760px){.crow{grid-template-columns:1fr}.cov{width:100%}.crow .r{text-align:left;display:flex;align-items:center;gap:14px}}
+
+/* author projects */
+.ap{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.ap a{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;display:block;transition:.25s}
+.ap a:hover{transform:translateY(-4px);border-color:#e0b06055}
+.ap .ic{font-size:30px}
+.ap b{display:block;font-family:Georgia,serif;font-weight:500;font-size:18px;margin-top:12px}
+.ap p{color:var(--mut);font-size:13.5px;margin-top:8px}
+.ap .go{display:inline-block;margin-top:14px;color:var(--gold);font-size:13px}
+@media(max-width:760px){.ap{grid-template-columns:1fr}}
 
 /* how */
 .how{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:36px}
@@ -256,6 +263,27 @@ footer a{color:var(--gold)}
   </div>
 </aside>
 
+<section id="author">
+  <div class="wrap">
+    <h2>Мои проекты — открыть и посмотреть</h2>
+    <p class="sub">За каждым товаром стоит моя живая работа: открытый код, витрины и демо.</p>
+    <div class="ap">
+      <a href="https://github.com/nwl01234/portfolio-app" target="_blank">
+        <div class="ic">👨‍💻</div><b>GitHub — код магазина</b>
+        <p>Сайт, бот, оплаты, синхронизация остатков — открыт в репозитории: смотри качество кода прямо сейчас.</p>
+        <span class="go">Открыть репозиторий →</span></a>
+      <a href="/tts.html">
+        <div class="ic">🎙</div><b>AI Call Center — витрина</b>
+        <p>Голосовой ИИ-оператор: архитектура, стек, возможности. Живой звонок — на созвоне перед оплатой.</p>
+        <span class="go">Открыть витрину →</span></a>
+      <a href="https://t.me/NexusDvBot?start=consult-orbit-crm" target="_blank">
+        <div class="ic">🧩</div><b>Orbit CRM — демо</b>
+        <p>Канбан, сделки, KPI-дашборд, AI-ассистент. Доступ к живому демо выдаёт бот за 1 вопрос.</p>
+        <span class="go">Запросить демо у бота →</span></a>
+    </div>
+  </div>
+</section>
+
 <footer>
   <p>AutoShop · сайт — <a href="https://github.com/nwl01234/portfolio-app">GitHub Pages</a> (код магазина открыт) · консультант — Telegram-бот без GPT, на базе знаний</p>
   <p style="margin-top:10px">Всё, что здесь продаётся, я умею собирать и внедрять для вашего бизнеса.</p>
@@ -274,12 +302,12 @@ function renderCatalog(){
   PRODUCTS.forEach(function(p){
     var row = document.createElement('div'); row.className = 'crow';
     var feats = (p.features||[]).slice(0,3).map(function(f){return '<i>'+f+'</i>'}).join('');
-    var q = p.qty > 0 ? '<span class="qty-chip">📦 в наличии: '+p.qty+'</span>' : '<span class="qty-chip zero">нет в наличии</span>';
+    var from = (p.unit==='от') ? 'от ' : '';
     row.innerHTML =
-      '<div class="e">'+p.emoji+'</div>'+
+      '<a class="covwrap" href="https://t.me/NexusDvBot?start=consult-'+p.id+'"><img class="cov" src="/img/products/'+p.id+'.png" alt="'+p.name+'"></a>'+
       '<div class="mid"><h3>'+p.name+'</h3><div class="tg">'+p.tagline+'</div><div class="tags">'+feats+'</div></div>'+
-      '<div class="r"><span class="price">'+money(p.price)+'</span> <span class="unit">'+p.unit+'</span><br>'+q+'<br>'+
-      '<button '+(p.qty<=0?'disabled':'')+' onclick="add(\''+p.id+'\')">Купить</button></div>';
+      '<div class="r"><div><span class="from">'+from+'</span><span class="price">'+money(p.price)+'</span></div>'+
+      '<button onclick="add(\''+p.id+'\')">Купить</button><br><a href="https://t.me/NexusDvBot?start=consult-'+p.id+'" style="font-size:12px;color:var(--mut)">или спросить бота</a></div>';
     host.appendChild(row);
   });
 }
@@ -292,7 +320,6 @@ function saveCart(){ try{ localStorage.setItem('as_cart', JSON.stringify(ITEMS))
 
 function add(id){
   var p = PRODUCTS.find(function(x){return x.id===id}); if(!p) return;
-  if((ITEMS[id]||0) >= p.qty) return;
   ITEMS[id] = (ITEMS[id]||0)+1; saveCart(); renderCart(); openCart();
 }
 
@@ -324,7 +351,7 @@ function renderCart(){
 }
 
 function bump(id, d){ var p=PRODUCTS.find(function(x){return x.id===id}); if(!p) return;
-  ITEMS[id]=(ITEMS[id]||0)+d; if(ITEMS[id]>p.qty){ITEMS[id]=p.qty} if(ITEMS[id]<=0){delete ITEMS[id]}
+  ITEMS[id]=(ITEMS[id]||0)+d; if(ITEMS[id]<=0){delete ITEMS[id]}
   saveCart(); renderCart(); }
 
 function openCart(){ renderCart(); document.getElementById('drawer').classList.add('show'); document.getElementById('ovl').classList.add('show'); }
