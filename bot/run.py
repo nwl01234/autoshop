@@ -17,10 +17,21 @@ async def main():
     bot = Bot(token=cfg.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
-    me = await bot.get_me()
-    url = (await bot.get_webhook_info()).url
-    if url:
-        await bot.delete_webhook(drop_pending_updates=False)
+
+    # старт может упасть, если сеть к api.telegram.org временно недоступна
+    # (VPN провалился, провайдер трясётся) — ждём и пробуем снова.
+    attempt, me = 0, None
+    while me is None:
+        try:
+            me = await bot.get_me()
+            url = (await bot.get_webhook_info()).url
+            if url:
+                await bot.delete_webhook(drop_pending_updates=False)
+        except Exception as e:
+            attempt += 1
+            wait = min(60, 5 * attempt)
+            print(f"[net] Telegram недоступен ({e.__class__.__name__}), повтор через {wait} c")
+            await asyncio.sleep(wait)
     print(f"Bot @{me.username} запущен · каталог: {len(_products())} товаров · GitHub sync: {'on' if cfg.GITHUB_TOKEN else 'local'}")
 
     def _status(mode: str) -> None:

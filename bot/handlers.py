@@ -1,5 +1,5 @@
 """LUMÉ — магазин косметики внутри Telegram: каталог фото-карточками, корзина,
-остатки, оформление заказа. Мини-приложение магазина открывается ОНЖЕВ Telegram."""
+остатки, оформление заказа. Мини-приложение магазина открывается ВНУТРИ Telegram."""
 import datetime
 import html as _h
 import uuid
@@ -111,7 +111,30 @@ def product_kb(pid: str) -> InlineKeyboardMarkup:
 
 
 def cover_url(pid: str) -> str:
-    return f"{site_base()}/img/products/{pid}.png"
+    return f"{site_base()}/img/products/{pid}.jpg"
+
+
+async def show(m: Message, text: str, markup) -> None:
+    """Правильная замена витрины: работает и для текстовых, и для фото-сообщений.
+
+    Telegram не даёт edit_text по сообщению с фото — отсюда «кнопка оборачивается
+    в вечный спиннер». Логика: edit_text → edit_caption → delete + новый ответ.
+    """
+    try:
+        await m.edit_text(text, reply_markup=markup)
+        return
+    except Exception:
+        pass
+    try:
+        await m.edit_caption(caption=text, reply_markup=markup)
+        return
+    except Exception:
+        pass
+    try:
+        await m.delete()
+    except Exception:
+        pass
+    await m.answer(text, reply_markup=markup)
 
 
 def cart_view_text(uid: int) -> str:
@@ -194,25 +217,27 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
 
     if d == "act:menu":
         await state.clear()
-        await m.edit_text("Главное:", reply_markup=menu_kb())
+        await show(m, "Главное:", menu_kb())
         return await A()
 
     if d == "act:catalog":
-        await m.edit_text(catalog_text(), reply_markup=catalog_kb())
+        await show(m, catalog_text(), catalog_kb())
         return await A()
 
     if d == "act:delivery":
-        await m.edit_text(
+        await show(
+            m,
             "🚚 <b>Доставка и возврат</b>\n\n"
-            "• СДЭК / Почта — 24–48 часов после оплаты, 300 ₽\n"
-            "• Бесплатно от 5 000 ₽\n"
-            "• Возврат 14 дней при реакции кожи — возврат 100%\n"
-            "• Оплата: переводом по реквизитам в чате или при получении",
+            "• СДЭК / Боксберри — 24–48 часов после подтверждения, 300 ₽\n"
+            "• Бесплатно от 3 500 ₽\n"
+            "• Возврат 14 дней: не подошло — вернём 100%\n"
+            "• Оплата: реквизиты приходят в чате после подтверждения заказа",
             reply_markup=kb([[btn("🛍 Каталог", "act:catalog"), btn("💬 Помощь", "act:help")]]))
         return await A()
 
     if d == "act:help":
-        await m.edit_text(
+        await show(
+            m,
             "Спросите по-простому: «что от постакне», «сколько осталось сыворотки», "
             "«как наносить ретинол» — отвечу.\n\nИли откройте витрину:",
             reply_markup=kb([[webapp_btn()], [btn("🛍 Каталог", "act:catalog"), btn("🏠 Меню", "act:menu")]]))
@@ -223,10 +248,14 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
         p = storage.product(pid)
         if not p:
             return await A("Товар не найден", alert=True)
+        media_tried = False
         try:
             await m.answer_photo(photo=cover_url(pid), caption=product_caption(pid), reply_markup=product_kb(pid))
+            media_tried = True
         except Exception:
-            await m.edit_text(product_caption(pid), reply_markup=product_kb(pid))
+            pass
+        if not media_tried:
+            await show(m, product_caption(pid), product_kb(pid))
         return await A()
 
     if d.startswith("add:"):
@@ -279,7 +308,7 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
                 validated[pid] = q
         if not validated:
             await state.clear()
-            await m.edit_text("🕐 Пока оформляли — всё распродано. Сожалеем!", reply_markup=menu_kb())
+            await show(m, "🕐 Пока оформляли — всё распродано. Сожалеем!", menu_kb())
             return await A()
         uid, (name, address) = o["uid"], o["user"]
         for pid, q in validated.items():
@@ -295,12 +324,13 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
         await state.clear()
         sold = "\n".join(f"• {storage.product(p)['name']} × {q}" for p, q in validated.items())
         total = total_of(validated)
-        await m.edit_text(
+        await show(
+            m,
             f"✅ <b>Оплачено · заказ собирается</b>\n\n{sold}\n\n"
             f"<b>Сумма: {total:,} ₽</b>\n\n".replace(",", " ") +
             "📦 Отправка СДЭК 24–48 ч · трек-номер придёт сюда же.\n"
             "Остатки на витрине уже обновились. С возвращением 💫",
-            reply_markup=kb([[webapp_btn()], [btn("🛍 Каталог", "act:catalog")]]))
+            kb([[webapp_btn()], [btn("🛍 Каталог", "act:catalog")]]))
         print(f"[pay] заказ {d[4:]} · sync: {mode} · позиций: {len(validated)}")
         return
 
@@ -310,12 +340,9 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
 async def cart_view(m: Message, uid: int):
     text = cart_view_text(uid)
     if not text:
-        await m.edit_text("🛒 Корзина пуста.", reply_markup=cart_kb())
+        await show(m, "🛒 Корзина пуста.", cart_kb())
         return
-    try:
-        await m.edit_text(text, reply_markup=cart_view_kb(uid))
-    except Exception:
-        pass
+    await show(m, text, cart_view_kb(uid))
 
 
 @router.callback_query(F.data == "cart:checkout")
@@ -366,7 +393,7 @@ async def order_address(m: Message, state: FSMContext):
 async def order_cancel(cq: CallbackQuery, state: FSMContext):
     ORDERS.pop(cq.data[7:], None)
     await state.clear()
-    await cq.message.edit_text("🚫 Заказ отменён.", reply_markup=menu_kb())
+    await show(cq.message, "🚫 Заказ отменён.", menu_kb())
     await cq.answer()
 
 
