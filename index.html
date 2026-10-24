@@ -211,10 +211,11 @@ section{padding:44px 0}
 @media(max-width:560px){.ci{grid-template-columns:64px 1fr auto;gap:10px}.ci img{width:64px;height:60px}}
 
 /* ================= toast ================= */
-#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,120%);z-index:120;
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);z-index:120;
   background:var(--ink);color:var(--bg);border-radius:100px;padding:12px 22px;font-size:13.5px;font-weight:600;
-  transition:transform .45s var(--ease);display:flex;gap:9px;align-items:center;box-shadow:0 18px 44px -16px rgba(0,0,0,.4)}
-#toast.show{transform:translate(-50%,0)}
+  transition:transform .45s var(--ease),opacity .3s;opacity:0;pointer-events:none;
+  display:flex;gap:9px;align-items:center;box-shadow:0 18px 44px -16px rgba(0,0,0,.4)}
+#toast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
 
 /* ================= footer ================= */
 footer{border-top:1px solid var(--line);margin-top:44px;padding:34px 0 44px;color:var(--mut);font-size:13px}
@@ -224,8 +225,43 @@ footer .mg{color:var(--mut);display:grid;gap:6px}
 footer a:hover{color:var(--ink)}
 
 /* reveal */
-.rv2{opacity:0;transform:translateY(26px)}
-.rv2.in-v{opacity:1;transform:none;transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.rv2{opacity:0;transform:translateY(26px);transition-delay:var(--d,0s)}
+.rv2.in-v{opacity:1;transform:none}
+.card{perspective:900px}
+.card .ph{will-change:transform}
+.card:hover .ph{box-shadow:inset 0 0 0 100vmax rgba(180,118,90,.04)}
+.card .ph:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(20,20,15,.32));opacity:0;transition:opacity .5s var(--ease);pointer-events:none}
+.card:hover .ph:after{opacity:1}
+
+/* stock table */
+.stock-t{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+.stock-t th,.stock-t td{padding:11px 16px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+.stock-t tr:last-child td{border-bottom:0}
+.stock-t th{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.stock-t td.num{font-variant-numeric:tabular-nums;font-weight:700}
+.stock-t .rsv{color:var(--acc);font-size:12.5px;font-weight:600}
+.stock-note{margin-top:10px;font-size:12.5px;color:var(--mut)}
+
+/* routines */
+.rt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.rt-grid{grid-template-columns:1fr}}
+.rt{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:22px}
+.rt h3{font-family:Georgia,serif;font-weight:500;font-size:22px;margin-bottom:14px}
+.rt h3 span{color:var(--acc);font-style:italic}
+.rt ol{list-style:none;display:grid;gap:10px}
+.rt li{display:flex;gap:12px;align-items:center;padding:9px 12px;border-radius:var(--r-sm);
+  border:1px solid var(--line);cursor:pointer;transition:all .3s var(--ease);background:var(--bg)}
+.rt li:hover{transform:translateX(6px);border-color:var(--acc)}
+.rt li b{font-family:Georgia,serif;color:var(--acc);font-size:13px}
+
+/* ingredients strip */
+.ing{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:820px){.ing{grid-template-columns:repeat(2,1fr)}}
+.ing a{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 20px;transition:all .35s var(--ease);position:relative;overflow:hidden}
+.ing a:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--acc)}
+.ing .il{font-size:30px}
+.ing h4{margin-top:10px;font-size:15px;font-weight:600}
+.ing p{margin-top:5px;font-size:13px;color:var(--mut);line-height:1.55}
 </style>
 </head>
 <body>
@@ -237,7 +273,7 @@ footer a:hover{color:var(--ink)}
       <div class="nav-l">
         <a href="#/catalog" data-nav="catalog">Каталог</a>
         <a href="#/about" data-nav="about">О бренде</a>
-        <a href="#/about#faq" data-nav="faq">Доставка</a>
+        <a href="#/about" data-nav="faq" data-scroll="faq">Доставка</a>
       </div>
       <div class="nav-r">
         <span id="stpill" class="pill" hidden><span class="dot pu"></span>Консультант на связи</span>
@@ -280,12 +316,55 @@ footer a:hover{color:var(--ink)}
         <div class="grid" id="topGrid"></div>
       </section>
 
+      <section id="sec-routines">
+        <div class="sec-h"><h2>Собранные рутины</h2><span class="kicker">Проверенная последовательность</span></div>
+        <div class="rt-grid">
+          <div class="rt">
+            <h3><span>Утро</span> — защита и сияние</h3>
+            <ol>
+              <li data-go="balm"><b>01</b> Очищающий бальзам — умыться</li>
+              <li data-go="vitc"><b>02</b> Витамин С 15% — 5 капель</li>
+              <li data-go="eye"><b>03</b> Ролик для глаз — 30 секунд</li>
+              <li data-go="spf50"><b>04</b> SPF 50+ — и на улицу</li>
+            </ol>
+          </div>
+          <div class="rt">
+            <h3><span>Вечер</span> — ремонт и текстура</h3>
+            <ol>
+              <li data-go="balm"><b>01</b> Бальзам — снять SPF и макияж</li>
+              <li data-go="toner"><b>02</b> АНА/BHA тонер — 3 раза в неделю</li>
+              <li data-go="clay"><b>03</b> Глиняная маска — 1–2 раза в неделю</li>
+              <li data-go="retinol"><b>04</b> Ретинальдегид — курсом, на ночь</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-ingredients">
+        <div class="sec-h"><h2>Ингредиенты, за которые отвечаем</h2></div>
+        <div class="ing">
+          <a href="#/p/serum"><div class="il">💧</div><h4>Гиалурон 3%</h4><p>5 молекулярных весов: вода держится 72 часа</p></a>
+          <a href="#/p/vitc"><div class="il">🍊</div><h4>Витамин C 15%</h4><p>Стабильный этиловый аскорбат + феруловая пара</p></a>
+          <a href="#/p/retinol"><div class="il">🌙</div><h4>Ретинальдегид 0,3%</h4><p>Инкапсулированный: работа есть, шелушений нет</p></a>
+          <a href="#/p/eye"><div class="il">👁</div><h4>Кофеин 5%</h4><p>Мешкам и тёмным кругам — не до пляжа</p></a>
+        </div>
+      </section>
+
+      <section id="sec-stock">
+        <div class="sec-h"><h2>Остатки · прямо сейчас</h2><span class="kicker" id="stockTime"></span></div>
+        <table class="stock-t"><thead><tr><th>Средство</th><th>На полке</th><th>В резервах</th><th>Доступно</th><th>Цена</th></tr></thead><tbody id="stockBody"></tbody></table>
+        <div class="stock-note">«Доступно» = на полке минус незавершённые резервы. Резерв живёт <b>15 минут</b> и не запирает склад для остальных.</div>
+      </section>
+
       <section>
         <div class="sec-h"><h2>Говорят те, кто пробует</h2><span class="kicker">Тест-группа, сентябрь</span></div>
         <div class="rv-grid">
-          <div class="rv"><div class="stars">★★★★★</div><p>«SPF правда невидимый: под тональник не скатился ни разу. Первый флюид, который не напоминает о себе к обеду».</p><div class="who">Марина <span>· Питер</span></div></div>
-          <div class="rv"><div class="stars">★★★★★</div><p>«Ретинол начала с двух раз в неделю — кожа чистая, без шелушений. Поры визуально мельче уже к третьей неделе».</p><div class="who">Алина <span>· Москва</span></div></div>
-          <div class="rv"><div class="stars">★★★★☆</div><p>«Бальзам растворяет SPF мгновенно, смывается без плёнки. Для глаз и губ тоже подошёл — не щиплет».</p><div class="who">Даша <span>· Казань</span></div></div>
+          <div class="rv rv2"><div class="stars">★★★★★</div><p>«SPF правда невидимый: под тональник не скатился ни разу. Первый флюид, который не напоминает о себе к обеду».</p><div class="who">Марина <span>· Питер</span></div></div>
+          <div class="rv rv2" style="--d:.08s"><div class="stars">★★★★★</div><p>«Ретинол начала с двух раз в неделю — кожа чистая, без шелушений. Поры визуально мельче уже к третьей неделе».</p><div class="who">Алина <span>· Москва</span></div></div>
+          <div class="rv rv2" style="--d:.16s"><div class="stars">★★★★☆</div><p>«Бальзам растворяет SPF мгновенно, смывается без плёнки. Для глаз и губ тоже подошёл — не щиплет».</p><div class="who">Даша <span>· Казань</span></div></div>
+          <div class="rv rv2"><div class="stars">★★★★★</div><p>«Гиалуроновая — как вода, впитывается мгновенно. Летом вместо крема вообще соло. Стянутость прошла на вторые сутки».</p><div class="who">Соня <span>· Сочи</span></div></div>
+          <div class="rv rv2" style="--d:.08s"><div class="stars">★★★★★</div><p>«Глиняная не сушит, как кислотные маски раньше. Поры чище, без красных пятен по выходу из маски».</p><div class="who">Кристина <span>· Екатеринбург</span></div></div>
+          <div class="rv rv2" style="--d:.16s"><div class="stars">★★★★☆</div><p>«Тонер: ровный тон чувствую на третий раз в неделю, кожа „отполированная“. Аккуратно с совместимостью с ретинолом!»</p><div class="who">Вера <span>· Москва</span></div></div>
         </div>
       </section>
 
@@ -398,7 +477,7 @@ if (T) {
 function haptic(kind){ try{ T && T.HapticFeedback && T.HapticFeedback.impactOccurred(kind||'light'); }catch(e){} }
 
 /* ---------- state ---------- */
-var PRODS = [], BYID = {}, CONFIG = {bot_username:'nwl0137Bot'}, STATUS = null;
+var PRODS = [], BYID = {}, CONFIG = {bot_username:'nwl0137Bot'}, STATUS = null, TTL = 900;
 var CATNAME = {serums:'Сыворотки', protect:'Защита', cleanse:'Очищение', masks:'Маски'};
 
 var CART = (function(){ try{ return JSON.parse(localStorage.getItem('lume_cart')||'{}') }catch(e){ return {} } })();
@@ -458,7 +537,8 @@ function fmt(v){ return v.toLocaleString('ru-RU')+'₽'; }
 /* ---------- commerce ---------- */
 function add(id, n, silent){
   var p=BYID[id]; if(!p) return;
-  if ((CART[id]||0) + (n||1) > p.qty){ toast('Извините, в наличии только '+p.qty+' шт'); haptic('rigid'); return; }
+  var avail = typeof p.available === 'number' ? p.available : p.qty;
+  if ((CART[id]||0) + (n||1) > avail){ toast('Доступно только '+avail+' шт (остальное в резервах)'); haptic('rigid'); return; }
   CART[id]=(CART[id]||0)+(n||1); if(!CART[id]) delete CART[id];
   saveCart(); haptic('light');
   if(!silent) toast('«'+p.name.split('·')[0].trim()+'» — в корзине');
@@ -466,7 +546,8 @@ function add(id, n, silent){
 function setQty(id, n){
   if(n<=0){ cartRemove(id); return; }
   var p=BYID[id]; if(!p) return;
-  if(n>p.qty){ toast('В наличии: '+p.qty+' шт'); haptic('rigid'); return; }
+  var avail = typeof p.available === 'number' ? p.available : p.qty;
+  if(n>avail){ toast('Доступно: '+avail+' шт'); haptic('rigid'); return; }
   CART[id]=n; saveCart();
 }
 function cartRemove(id){ delete CART[id]; saveCart(); }
@@ -475,14 +556,15 @@ function cartRemove(id){ delete CART[id]; saveCart(); }
 function bnb(q){
   if(q<=0) return '<span class="bnb zero">Нет в наличии</span>';
   if(q<=8)  return '<span class="bnb low">Осталось '+q+'</span>';
-  return '<span class="bnb in">В наличии</span>';
+  return '<span class="bnb in">'+q+' шт в наличии</span>';
 }
 
 /* ---------- cards ---------- */
-function cardHTML(p){
+function cardHTML(p, i){
   var c = CATNAME[p.cat]||'Уход';
-  return '<article class="card rv2" onclick="location.hash=\'#/p/'+p.id+'\'">'+
-    '<div class="ph"><img loading="lazy" src="'+p.img+'" alt="'+esc(p.name)+'"><span class="ph-left" style="position:absolute;top:10px;left:10px">'+bnb(p.qty)+'</span></div>'+
+  var left = typeof p.available === 'number' ? p.available : p.qty;
+  return '<article class="card rv2" style="--d:'+((i%4)*0.07)+'s" onclick="location.hash=\'#/p/'+p.id+'\'">'+
+    '<div class="ph"><img loading="lazy" src="'+p.img+'" alt="'+esc(p.name)+'"><span style="position:absolute;top:10px;left:10px">'+bnb(left)+'</span></div>'+
     '<div class="bd"><div class="cat">'+c+'</div><h3>'+esc(p.name)+'</h3><div class="tg">'+esc(p.tagline)+'</div>'+
     '<div class="row"><span class="price">'+fmt(p.price)+'<small>/ '+p.volume+'</small></span>'+
     '<button class="link-c" data-add="'+p.id+'">В корзину</button></div></div></article>';
@@ -526,9 +608,11 @@ function render(){
   if(r.page==='product') renderProduct(r.id);
   if(r.page==='catalog') renderCatalog();
   if(r.page==='cart') renderCartPage();
-  if(r.page==='home'){ renderGrid($('#topGrid'), PRODS.slice(0,4)); }
+  if(r.page==='home'){ renderGrid($('#topGrid'), PRODS.slice(0,4)); renderStockTable(); }
   revealAll(); renderCartBadge();
   window.scrollTo(0,0);
+  var anchor = SCROLL_TO; SCROLL_TO = null;
+  if (anchor) { var el = $('#'+anchor); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); }
   if (T && T.BackButton){
     try{ if(r.page==='home'){ T.BackButton.hide(); } else { T.BackButton.show(); } }catch(e){}
   }
@@ -628,21 +712,15 @@ function checkout(){
   if(!cartCount()) return;
   var items={}; for(var k in CART) items[k]=CART[k];
   if(BACKEND){
-    $('#checkout').disabled=true; $('#checkout').textContent='Оформляем…';
+    $('#checkout').disabled=true; $('#checkout').textContent='Резервируем…';
     fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({items:items})}).then(function(r){return r.json().then(function(j){return {code:r.status,j:j}})})
       .then(function(res){
         if(res.code===200 && res.j.ok){
           CART={}; saveCart(); haptic('heavy');
-          var w=$('#cartWrap');
-          w.innerHTML='<div class="empty"><div class="big">Заказ '+res.j.id+' принят ✳</div>'+
-            '<p>Итого к оплате: <b>'+fmt(res.j.total)+'</b></p>'+
-            '<p style="margin-top:8px">Склад уже уменьшился — остатки на сайте обновились. '+
-            'Оплата и трек приходят в чате консультанта.</p>'+
-            '<a class="btn acc" style="margin-top:20px" href="#/catalog">В каталог</a></div>';
-          loadBackend().catch(function(){});
+          renderReceipt(res.j);
         } else if(res.code===409){
-          toast('Остатки изменились — поправьте корзину'); haptic('rigid');
+          toast('Доступно меньше — смотри таблицу остатков'); haptic('rigid');
           loadBackend().then(function(){ render(); });
         } else {
           toast(res.j.error||'Не удалось оформить'); render();
@@ -650,13 +728,45 @@ function checkout(){
       }).catch(function(){ toast('Сервер недоступен'); render(); });
     return;
   }
-  /* статик-режим (Pages / file://): заказ уходит боту */
+  /* статик-режим (Pages): заказ уходит боту deep-link */
   var raw = JSON.stringify({src:'site', items:items});
   var b = btoa(unescape(encodeURIComponent(raw))).replace(/=+$/,'');
   var url='https://t.me/'+CONFIG.bot_username+'?start=ORD'+b;
   if(T && T.openTelegramLink) T.openTelegramLink(url);
   else if(T && T.openLink) T.openLink(url);
   else window.open(url,'_blank');
+}
+
+function renderReceipt(o){
+  var w=$('#cartWrap'), m=Math.round((o.ttl||900)/60);
+  w.innerHTML='<div class="empty" style="padding:50px 0"><div class="big">Заказ '+o.id+' — зарезервирован</div>'+
+    '<p>Сумма: <b>'+fmt(o.total)+'</b> · резерв держит товар <b>только за вами</b> '+m+' минут.</p>'+
+    '<p style="margin-top:8px;color:var(--mut)">Оплаты ждём '+m+' минут; не оплатите вовремя — резерв вернётся на склад автоматически.</p>'+
+    '<div class="cart-actions" style="justify-content:center">'+
+    '<button class="btn acc" id="payNow">Оплатить сейчас (демо-подтверждение)</button>'+
+    '<button class="btn ghost" id="rsvCancel">Отменить резерв</button></div></div>';
+  $('#payNow').onclick=function(){ payOrder(o.id,false); };
+  $('#rsvCancel').onclick=function(){ payOrder(o.id,true); };
+}
+function payOrder(oid, cancel){
+  var url='/api/orders/'+oid+'/'+(cancel?'cancel':'confirm');
+  fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+    .then(function(r){ return r.json().then(function(j){ return {code:r.status, j:j}; }); })
+    .then(function(res){
+      if(!cancel && res.code===200 && res.j.ok){
+        haptic('heavy');
+        $('#cartWrap').innerHTML='<div class="empty"><div class="big">Оплачено · '+oid+' ✅</div>'+
+          '<p>Склад уже уменьшился — остатки на сайте актуальные.</p>'+
+          '<p style="color:var(--mut)">Доставка СДЭК 24–48 ч · трек придёт в чат.</p>'+
+          '<a class="btn acc" style="margin-top:16px" href="#/catalog">В каталог</a></div>';
+        loadBackend().catch(function(){});
+      } else if(cancel){
+        toast('Резерв снят · товар вернулся на склад');
+        loadBackend().then(function(){ go('#/catalog'); });
+      } else {
+        toast(res.j.error||'Резерв истёк'); loadBackend().then(function(){ go('#/cart'); });
+      }
+    }).catch(function(){ toast('Сервер недоступен'); });
 }
 
 /* ---------- status (.HttpSession وضع) ---------- */
@@ -669,6 +779,23 @@ function loadStatus(){
       ? '<span class="dot pu"></span>Консультант на связи'
       : '<span class="dot off"></span>Консультант оффлайн';
   }).catch(function(){});
+}
+
+/* ---------- stock table (живые остатки) ---------- */
+function renderStockTable(){
+  var tb = $('#stockBody'); if(!tb) return;
+  tb.innerHTML = PRODS.map(function(p){
+    var avail = typeof p.available==='number'?p.available:p.qty;
+    var rsv = p.reserved||0;
+    var mark = avail>8?'<span style="color:var(--grn)">●</span>':(avail>0?'<span style="color:#c8a24e">●</span>':'<span style="color:var(--red)">●</span>');
+    return '<tr class="rv2" onclick="location.hash=\'#/p/'+p.id+'\'" style="cursor:pointer">'+
+      '<td>'+esc(p.name)+'</td><td class="num">'+p.qty+'</td>'+
+      '<td class="rsv">'+(rsv?('резерв '+rsv):'—')+'</td>'+
+      '<td class="num">'+mark+' '+avail+'</td>'+
+      '<td class="num">'+fmt(p.price)+'</td></tr>';
+  }).join('');
+  var st=document.getElementById('stockTime');
+  if(st) st.textContent = 'обновлено '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
 }
 
 /* ---------- data boot ---------- */
@@ -688,12 +815,18 @@ function boot(){
   });
   loadStatus();
   setInterval(loadStatus, 45000);
+  setInterval(function(){ loadBackend().then(renderStockTable).catch(function(){}); }, 60000);
 }
 
 /* ---------- misc wiring ---------- */
 $('#cartBtn').onclick=function(){ go('#/cart'); haptic('light'); };
 window.addEventListener('hashchange', render);
 $('#faq').addEventListener('click', function(e){ var i=e.target.closest('.acc-item'); if(i) i.classList.toggle('open'); });
+$$('.nav-l a[data-scroll]').forEach(function(a){ a.addEventListener('click', function(){ SCROLL_TO=a.dataset.scroll; }); });
+document.addEventListener('click', function(e){
+  var li = e.target.closest && e.target.closest('.rt li[data-go]');
+  if(li){ go('#/p/'+li.dataset.go); haptic('light'); }
+});
 var botLink=$('#footTg'); if(botLink) botLink.onclick=function(e){ e.preventDefault();
   var url='https://t.me/'+CONFIG.bot_username;
   if(T && T.openTelegramLink) T.openTelegramLink(url); else window.open(url,'_blank');
