@@ -224,6 +224,24 @@ footer .brand{font-size:16px;color:var(--ink)}
 footer .mg{color:var(--mut);display:grid;gap:6px}
 footer a:hover{color:var(--ink)}
 
+/* ================= admin ================= */
+.ad-form{max-width:420px;margin:40px auto;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:26px}
+.ad-form input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg);margin:8px 0 14px;font-size:14.5px}
+.ad-title{font-family:Georgia,serif;font-weight:500;font-size:30px;margin-bottom:16px}
+.ad-pil{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}
+.ad-tab{padding:10px 18px;border-radius:100px;border:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--mut);background:var(--paper)}
+.ad-tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ad-row{display:grid;grid-template-columns:1.6fr .8fr .8fr 1fr .9fr;gap:10px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:8px}
+.ad-row input{padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font-size:13.5px;width:100%}
+.ad-order{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:10px}
+.ad-order .who{font-weight:700;font-size:14px}
+.ad-order .what{color:var(--mut);font-size:13px;margin-top:4px}
+.ad-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ad-actions button{font-size:12.5px;padding:6px 12px;border-radius:100px;border:1px solid var(--line);font-weight:600}
+.ad-actions .s-paid{background:color-mix(in srgb,var(--grn) 12%,transparent);color:var(--grn)}
+.ad-actions .s-shipped{background:var(--ink);color:var(--bg)}
+@media(max-width:720px){.ad-row{grid-template-columns:1fr 1fr;grid-auto-rows:auto}}
+
 /* reveal */
 .rv2{opacity:0;transform:translateY(26px);transition-delay:var(--d,0s)}
 .rv2.in-v{opacity:1;transform:none}
@@ -436,6 +454,10 @@ footer a:hover{color:var(--ink)}
       </div>
     </div>
   </section>
+  <!-- ############ ADMIN ############ -->
+  <section class="view" id="v-admin">
+    <div class="wrap" id="adminWrap" style="padding-top:32px"></div>
+  </section>
 </main>
 
 <footer>
@@ -597,6 +619,7 @@ function parse(){
   if(h.indexOf('#/catalog')===0) return {page:'catalog'};
   if(h.indexOf('#/cart')===0) return {page:'cart'};
   if(h.indexOf('#/about')===0) return {page:'about'};
+  if(h.indexOf('#/admin')===0) return {page:'admin'};
   return {page:'home'};
 }
 function render(){
@@ -608,6 +631,7 @@ function render(){
   if(r.page==='product') renderProduct(r.id);
   if(r.page==='catalog') renderCatalog();
   if(r.page==='cart') renderCartPage();
+  if(r.page==='admin'){ renderAdmin(); }
   if(r.page==='home'){ renderGrid($('#topGrid'), PRODS.slice(0,4)); renderStockTable(); }
   revealAll(); renderCartBadge();
   window.scrollTo(0,0);
@@ -616,7 +640,14 @@ function render(){
   if (T && T.BackButton){
     try{ if(r.page==='home'){ T.BackButton.hide(); } else { T.BackButton.show(); } }catch(e){}
   }
+  /* биг-кнопка «Оформить» — только в корзине */
+  try{
+    if(T && T.MainButton){
+      if(r.page==='cart' && cartCount()) T.MainButton.show(); else T.MainButton.hide();
+    }
+  }catch(e){}
 }
+try{ T && T.MainButton && T.MainButton.onClick(checkout); }catch(e){}
 try{ T && T.BackButton && T.BackButton.onClick(function(){ history.back(); }); }catch(e){}
 
 /* ---------- catalog ---------- */
@@ -703,7 +734,10 @@ function renderCartPage(){
   '<p style="margin-top:14px;color:var(--mut);font-size:13px">'+(BACKEND
     ? 'Заказ проходит через REST-бэкенд этого сайта: проверка и списание остатков — мгновенно, на сервере.'
     : 'Заказ откроется в чате с консультантом LUMÉ: подтвердим наличие, возьмём адрес и отправим трек.')+'</p>';
-
+  /* Telegram-sеньор MainButton */
+  if (T && T.MainButton){
+    try{ T.MainButton.setText('Оформить · '+fmt(total)); T.MainButton.show(); T.MainButton.enable(); }catch(e){}
+  }
   $$('#v-cart [data-cq]').forEach(function(b){ b.onclick=function(){ setQty(b.dataset.cq, CART[b.dataset.cq]+ +b.dataset.d); render(); }; });
   $$('#v-cart [data-rm]').forEach(function(a){ a.onclick=function(e){ e.preventDefault(); cartRemove(a.dataset.rm); render(); }; });
   $('#checkout').onclick=checkout;
@@ -711,6 +745,18 @@ function renderCartPage(){
 function checkout(){
   if(!cartCount()) return;
   var items={}; for(var k in CART) items[k]=CART[k];
+  var total=cartTotal();
+  /* Telegram Mini App: заказ прямо боту (без браузера) */
+  if (T && T.sendData){
+    try{ haptic('medium'); T.sendData(JSON.stringify({action:'order', items:items, total:total})); }catch(e){}
+    CART={}; saveCart();
+    var w=$('#cartWrap');
+    w.innerHTML='<div class="empty"><div class="big">Корзина передана в чат ✈️</div>'+
+      '<p>Бот получил заказ и спросит адрес здесь же, в диалоге.</p>'+
+      '<p style="color:var(--mut)">Если сообщение не появилось — жми /start в чате бота.</p></div>';
+    try{ T.close(); }catch(e){}
+    return;
+  }
   if(BACKEND){
     $('#checkout').disabled=true; $('#checkout').textContent='Резервируем…';
     fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -779,6 +825,91 @@ function loadStatus(){
       ? '<span class="dot pu"></span>Консультант на связи'
       : '<span class="dot off"></span>Консультант оффлайн';
   }).catch(function(){});
+}
+
+/* ================= ADMIN PANEL ================= */
+var ADBODY = $('#adminWrap');
+var ADM = { token: localStorage.getItem('lume_adm')||'', tab:'products', prods:[], orders:[] };
+
+function admFetch(url, opt){
+  opt = opt||{};
+  opt.headers = Object.assign({'Content-Type':'application/json','X-Admin-Token':ADM.token}, opt.headers||{});
+  return fetch(url, opt).then(function(r){ return r.json().then(function(j){ return {code:r.status, j:j} }); });
+}
+function renderAdmin(){
+  if(!ADBODY) return;
+  if(!BACKEND){
+    ADBODY.innerHTML='<div class="empty"><div class="big">Админка живёт на бэкенде</div>Запусти <span class="mono">start.bat</span> (server/app.py) — панель появится здесь.<br><a class="link-c" href="#/">← на витрину</a></div>';
+    return;
+  }
+  if(!ADM.token){ admLogin(); return; }
+  admFetch('/api/admin/orders').then(function(res){
+    if(res.code===401){ admLogin(true); return; }
+    ADM.orders=res.j.orders||[];
+    admDashboard();
+  }).catch(function(){ admLogin(false); });
+}
+function admLogin(wrong){
+  ADBODY.innerHTML='<div class="ad-form"><div class="ad-title">Вход · LUMÉ admin</div>'+
+    '<label class="kicker" for="adTok">ADMIN_TOKEN</label>'+
+    '<input id="adTok" type="password" placeholder="токен из .env" '+(wrong?'autofocus':'')+'>'+
+    (wrong?'<div style="color:var(--red);font-size:13px;margin:-6px 0 12px">Не принят — проверь ADMIN_TOKEN в .env</div>':'')+
+    '<button class="btn acc" id="adGo" style="width:100%;justify-content:center">Войти</button>'+
+    '<p style="margin-top:12px;color:var(--mut);font-size:12.5px">Токен хранится только в этом браузере (localStorage) и ходит в заголовке X-Admin-Token.</p></div>';
+  var go=function(){ ADM.token=$('#adTok').value.trim(); localStorage.setItem('lume_adm',ADM.token); renderAdmin(); };
+  $('#adGo').onclick=go;
+  $('#adTok').addEventListener('keydown', function(e){ if(e.key==='Enter') go(); });
+}
+function admDashboard(){
+  ADBODY.innerHTML='<div class="ad-title">Управление LUMÉ</div>'+
+    '<div class="ad-pil"><button class="ad-tab'+(ADM.tab==='products'?' on':'')+'" data-tab="products">Товары</button>'+
+    '<button class="ad-tab'+(ADM.tab==='orders'?' on':'')+'" data-tab="orders">Заказы</button>'+
+    '<span class="pill" style="margin-left:auto"><span class="dot pu"></span>'+PRODS.length+' позиций</span>'+
+    '<button class="ad-tab" id="adOut">Выйти</button></div><div id="adBody"></div>';
+  $$('.ad-tab[data-tab]').forEach(function(b){ b.onclick=function(){ ADM.tab=b.dataset.tab; renderAdmin(); }; });
+  $('#adOut').onclick=function(){ ADM.token=''; localStorage.removeItem('lume_adm'); renderAdmin(); };
+  if(ADM.tab==='products') admProducts(); else admOrders();
+}
+function admProducts(){
+  var b=$('#adBody');
+  b.innerHTML='<div><div class="ad-row" style="border:0;background:transparent;padding:0;font-size:11px;color:var(--mut)">'+
+    '<span>название</span><span>цена ₽</span><span>остаток</span><span>статус</span><span></span></div></div>'+
+    PRODS.map(function(p){
+      return '<div class="ad-row" data-uid="'+p.id+'"><b style="font-size:13.5px">'+esc(p.name.split('·')[0])+'</b>'+
+      '<input data-f="price" value="'+p.price+'">'+
+      '<input data-f="qty" value="'+p.qty+'">'+
+      '<span style="font-size:12.5px;color:var(--mut)">'+(p.available==p.qty?'живой':'в резервах')+'</span>'+
+      '<button class="ad-tab" style="padding:7px 14px" data-save="'+p.id+'">Сохранить</button></div>';
+    }).join('');
+  $$('[data-save]').forEach(function(x){ x.onclick=function(){
+    var row=x.closest('.ad-row'), uid=row.dataset.uid;
+    var patch={};
+    var pr=parseInt(row.querySelector('[data-f=price]').value), qt=parseInt(row.querySelector('[data-f=qty]').value);
+    if(!isNaN(pr)) patch.price=pr; if(!isNaN(qt)) patch.qty=qt;
+    admFetch('/api/admin/'+uid, {method:'POST', body:JSON.stringify(patch)}).then(function(res){
+      if(res.code===200){ toast('Товар обновлён'); loadBackend().then(function(){ ADM.tab='products'; renderAdmin(); }); }
+      else toast(res.j.error||'Не сохранено');
+    });
+  }; });
+}
+function admOrders(){
+  var b=$('#adBody'), os=ADM.orders;
+  if(!os.length){ b.innerHTML='<div class="empty">Заказов пока нет</div>'; return; }
+  b.innerHTML=os.map(function(o){
+    var what=(o.items? Object.keys(o.items).map(function(pid){ var p=BYID[pid]; return (p?p.name.split('·')[0]:pid)+' ×'+o.items[pid]; }).join(' · '):'');
+    return '<div class="ad-order"><div class="who">'+o.id+' · '+(o.total||0).toLocaleString('ru-RU')+'₽ <span style="color:var(--acc);font-size:12px" class="mono">'+(o.status||'')+'</span></div>'+
+    '<div class="what">'+esc(what)+' · '+o.time+'</div>'+
+    '<div class="ad-actions">'+
+      (o.status!=='paid'? '<button class="s-paid" data-st="paid" data-oid="'+o.id+'">Оплачен</button>':'')+
+      (o.status!=='shipped'? '<button class="s-shipped" data-st="shipped" data-oid="'+o.id+'">Отправлен</button>':'')+
+      (o.status!=='refunded'? '<button data-st="refunded" data-oid="'+o.id+'">Возврат</button>':'')+
+    '</div></div>';
+  }).join('');
+  $$('[data-st]').forEach(function(x){ x.onclick=function(){
+    admFetch('/api/admin/orders/'+x.dataset.oid, {method:'POST', body:JSON.stringify({status:x.dataset.st})}).then(function(res){
+      if(res.code===200){ toast('Статус: '+x.dataset.st); renderAdmin(); } else toast('Не сохранено');
+    });
+  }; });
 }
 
 /* ---------- stock table (живые остатки) ---------- */

@@ -2,6 +2,7 @@
 остатки, оформление заказа. Мини-приложение магазина открывается ВНУТРИ Telegram."""
 import datetime
 import html as _h
+import json as _json
 import uuid
 
 from aiogram import F, Router
@@ -200,6 +201,41 @@ async def handle_payload(m: Message, payload: str, state: FSMContext) -> bool:
     CART[m.from_user.id] = valid
     await m.answer(cart_view_text(m.from_user.id), reply_markup=cart_view_kb(m.from_user.id))
     return True
+
+
+@router.message(F.web_app_data)
+async def webapp_order(m: Message, state: FSMContext):
+    """Заказ из Mini App: WebApp.sendData() присылает сюда JSON корзины.
+    Покупатель жмёт «Оформить» в магазине — и дальше всё происходит здесь, в чате."""
+    try:
+        data = _json.loads(m.web_app_data.data or "{}")
+    except Exception:
+        data = {}
+    items = data.get("items") if isinstance(data.get("items"), dict) else {}
+    valid: dict[str, int] = {}
+    for pid, q in items.items():
+        p = storage.product(str(pid).lower())
+        if not p:
+            continue
+        try:
+            q = int(q)
+        except (TypeError, ValueError):
+            continue
+        q = min(max(1, q), max(stock_of(p["id"]), 0))
+        if q > 0:
+            valid[p["id"]] = q
+    if not valid:
+        await m.answer("Из корзины ничего не пришло — всё уже законтрактовано? "
+                       "Откройте каталог и соберите заново 👇", reply_markup=menu_kb())
+        return
+    CART[m.from_user.id] = valid
+    total = total_of(valid)
+    lines = "\n".join(f"• {storage.product(p)['name']} × {q}" for p, q in valid.items())
+    await m.answer(
+        f"🧾 <b>Заказ из магазина</b>\n{lines}\n<b>Итого: {total:,} ₽</b>\n\n".replace(",", " ") +
+        "Осталось два шага — куда доставлять?")
+    await state.set_state(St.name)
+    await m.answer("1/2 — Имя получателя:")
 
 
 # ---------------- callbacks ----------------

@@ -270,6 +270,69 @@ def api_orders_log() -> dict:
     return load("orders.json") or {"orders": []}
 
 
+# ---------------- админ-контур ----------------
+def admin_token() -> str:
+    """ADMIN_TOKEN — в .env рядом с BOT_TOKEN. Без токена админ-контур закрыт."""
+    tok = os.environ.get("ADMIN_TOKEN")
+    if not tok:
+        envf = ROOT / ".env"
+        if envf.exists():
+            for line in envf.read_text(encoding="utf-8", errors="replace").splitlines():
+                if line.strip().startswith("ADMIN_TOKEN="):
+                    tok = line.split("=", 1)[1].strip()
+                    break
+    return (tok or "").strip()
+
+
+def is_admin(req) -> bool:
+    return bool(admin_token()) and req.headers.get("X-Admin-Token", "") == admin_token()
+
+
+def api_admin_products() -> dict:
+    return api_products()
+
+
+def api_admin_patch(uid: str, body: dict) -> tuple[int, dict]:
+    """Правка товара: цена/имя/qty/active — и в products.json, и в сток-таблице."""
+    with LOCK:
+        doc = load("products.json") or {"products": []}
+        target = next((p for p in doc["products"] if p["id"] == uid), None)
+        if not target:
+            return 404, {"ok": False, "error": "товар не найден"}
+        if "price" in body:
+            b = int(body["price"])
+            if b < 0:
+                return 400, {"ok": False, "error": "цена < 0"}
+            target["price"] = b
+        if "name" in body and str(body["name"]).strip():
+            target["name"] = str(body["name"]).strip()[:90]
+        if "qty" in body:
+            stock = load_stock()
+            stock[uid] = max(0, int(body["qty"]))
+            save_stock_csv(stock)
+            target["qty"] = stock[uid]
+        if "active" in body:
+            target["hidden"] = not bool(body["active"])
+        target["desc"] = target.get("desc", "")
+        doc["updated"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        save("products.json", doc)
+    return 200, {"ok": True, "product": target}
+
+
+def api_admin_orders(uid: str | None, body: dict) -> tuple[int, dict]:
+    with LOCK:
+        orders = load("orders.json") or {"orders": []}
+        if uid:
+            o = next((o for o in orders["orders"] if o["id"] == uid), None)
+            if not o:
+                return 404, {"ok": False, "error": "заказ не найден"}
+            o["status"] = str((body or {}).get("status") or "paid")[:12]
+            orders["updated"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+            save("orders.json", orders)
+            return 200, {"ok": True, "order": o}
+    return 200, {"ok": True, "orders": orders["orders"][:100], "reserves": RESERVES}
+
+
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
@@ -301,6 +364,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def _get(self):
         route = urlparse(self.path).path
+        if route == "/api/admin/orders":
+            if not is_admin(self):
+                return self._send(401, {"ok": False, "error": "требуется X-Admin-Token"})
+            code, body_out = api_admin_orders(None, {})
+            return self._send(code, body_out)
         if route == "/api/products":
             return self._send(200, api_products())
         if route == "/api/status":
@@ -332,6 +400,16 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/orders":
             code, body = api_order(body)
             return self._send(code, body)
+        if len(parts) == 3 and parts[0] == "api" and parts[1] == "admin":
+            if not is_admin(self):
+                return self._send(401, {"ok": False, "error": "требуется X-Admin-Token"})
+            code, body_out = api_admin_patch(parts[2], body)
+            return self._send(code, body_out)
+        if len(parts) == 4 and parts[0] == "api" and parts[1] == "admin" and parts[2] == "orders":
+            if not is_admin(self):
+                return self._send(401, {"ok": False, "error": "требуется X-Admin-Token"})
+            code, body_out = api_admin_orders(parts[3], body)
+            return self._send(code, body_out)
         if len(parts) == 4 and parts[0] == "api" and parts[1] == "orders":
             oid, action = parts[2], parts[3]
             if action == "confirm":
@@ -346,7 +424,12 @@ class Handler(BaseHTTPRequestHandler):
 def run():
     port = int(os.environ.get("PORT") or 8300)
     srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    print(f"LUMÉ backend: http://127.0.0.1:{port}  ·  резервов: {len(RESERVES)} · TTL {RESERVE_TTL//60} мин")
+    p = api_products()
+    alive = sum(1 for x in p["products"] if x.get("available", 0) > 0)
+    total_units = sum(x.get("available", 0) for x in p["products"])
+    print(f"LUME backend: http://127.0.0.1:{port}")
+    print(f"  sklad: {len(p['products'])} pozitsiy · {total_units} sht dostupno · {alive} zhivyh · TTL rezerva {RESERVE_TTL//60} min")
+    print(f"  adminka: http://127.0.0.1:{port}/#/admin")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
