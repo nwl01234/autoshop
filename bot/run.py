@@ -16,7 +16,16 @@ from .handlers import router, site_base
 async def main():
     if not cfg.BOT_TOKEN:
         raise SystemExit("BOT_TOKEN пуст — вписать в .env (рядом: GITHUB_TOKEN=GITHUB PAT)")
-    bot = Bot(token=cfg.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    # Если провайдер режет Telegram по SNI — указываем прокси VPN-клиента:
+    #   .env:  BOT_PROXY=http://127.0.0.1:7890   (или socks5://127.0.0.1:1080)
+    import os
+    from aiogram.client.session.aiohttp import AiohttpSession
+    proxy = (os.environ.get("BOT_PROXY") or read_env("BOT_PROXY") or "").strip()
+    session = AiohttpSession(proxy=proxy) if proxy else AiohttpSession()
+    if proxy:
+        print(f"[proxy] бот идёт через {proxy.split('@')[-1]}")
+    bot = Bot(token=cfg.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+              session=session)
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
 
@@ -65,6 +74,17 @@ async def main():
 def _products():
     from . import storage
     return storage.products()
+
+
+def read_env(name: str) -> str:  # .env не требует dotenv: читаем вручную
+    from pathlib import Path
+    f = Path(__file__).resolve().parents[1] / ".env"
+    if not f.exists():
+        return ""
+    for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
+        if line.strip().startswith(name + "="):
+            return line.split("=", 1)[1].strip()
+    return ""
 
 
 if __name__ == "__main__":

@@ -69,6 +69,18 @@ nav.hide{transform:translateY(-100%)}
 @keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
 @media(max-width:760px){.nav-l{display:none}}
 
+/* мобильный таббар (Mini App / телефон) */
+.tabbar{display:none}
+@media(max-width:760px){
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:90;
+    background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+  body{padding-bottom:58px}
+  .tabbar a{flex:1;text-align:center;font-size:11px;color:var(--mut);font-weight:600;padding:5px 2px;transition:color .2s}
+  .tabbar a.on,.tabbar a:active{color:var(--acc)}
+  .tabbar a span{display:block;font-size:18px;margin-bottom:2px}
+}
+
 /* ================= views / router ================= */
 main{padding-top:var(--nav-h)}
 .view{display:none;min-height:60vh}
@@ -458,6 +470,13 @@ footer a:hover{color:var(--ink)}
   <section class="view" id="v-admin">
     <div class="wrap" id="adminWrap" style="padding-top:32px"></div>
   </section>
+  <!-- мобильный таббар: нашёл каталог, корзина под пальцем -->
+  <nav class="tabbar" id="tabbarWrap">
+    <a href="#/" data-tab="home"><span>✨</span>Главная</a>
+    <a href="#/catalog" data-tab="catalog"><span>🧪</span>Каталог</a>
+    <a href="#/cart" data-tab="cart"><span>🛍</span>Корзина</a>
+    <a href="#/about#faq" data-tab="about"><span>✉️</span>Доставка</a>
+  </nav>
 </main>
 
 <footer>
@@ -635,8 +654,15 @@ function render(){
   if(r.page==='home'){ renderGrid($('#topGrid'), PRODS.slice(0,4)); renderStockTable(); }
   revealAll(); renderCartBadge();
   window.scrollTo(0,0);
-  var anchor = SCROLL_TO; SCROLL_TO = null;
+  /* якорь: из прямой ссылки (#/about#faq) или из клика по data-scroll */
+  var anchor = SCROLL_TO || (location.hash.indexOf('#faq') > 0 ? 'faq' : null);
+  SCROLL_TO = null;
   if (anchor) { var el = $('#'+anchor); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); }
+  /* активный таб */
+  $$('#tabbarWrap a').forEach(function(a){ a.classList.remove('on') });
+  var tb = r.page==='product' ? 'catalog' : (r.page==='admin' ? null : r.page);
+  if (r.page==='about' && location.hash.indexOf('#faq')>0) tb='about';
+  var tbA = $('#tabbarWrap a[data-tab="'+(tb||'x')+'"]'); if(tbA) tbA.classList.add('on');
   if (T && T.BackButton){
     try{ if(r.page==='home'){ T.BackButton.hide(); } else { T.BackButton.show(); } }catch(e){}
   }
@@ -752,9 +778,15 @@ function checkout(){
     CART={}; saveCart();
     var w=$('#cartWrap');
     w.innerHTML='<div class="empty"><div class="big">Корзина передана в чат ✈️</div>'+
-      '<p>Бот получил заказ и спросит адрес здесь же, в диалоге.</p>'+
-      '<p style="color:var(--mut)">Если сообщение не появилось — жми /start в чате бота.</p></div>';
-    try{ T.close(); }catch(e){}
+      '<p>Бот получил заказ и ответит здесь же, в диалоге: адрес, оплата, трек.</p>'+
+      '<div class="cart-actions" style="justify-content:center;margin-top:14px">'+
+      '<button class="btn acc" id="openChat">Перейти в чат с ботом</button>'+
+      '<a class="btn ghost" href="#/catalog">Продолжить покупки</a></div></div>';
+    var oc=$('#openChat'); if(oc) oc.onclick=function(){
+      var url='https://t.me/'+CONFIG.bot_username;
+      if(T && T.openTelegramLink) T.openTelegramLink(url); else window.open(url,'_blank');
+    };
+    try{ T.MainButton && T.MainButton.hide(); }catch(e){}
     return;
   }
   if(BACKEND){
