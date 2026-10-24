@@ -1,5 +1,5 @@
 """Telegram-бот AutoShop: каталог, корзина, оплата, синк остатков в GitHub,
-консультант продумывает вопросы о товарах и продаёт."""
+оффлайн-консультант отвечает на любой вопрос и выводит диалог на сделку."""
 import datetime
 import html as _h
 import uuid
@@ -10,8 +10,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from . import ai, nlu, payload as payload_codec, storage
-from . import config as cfg
+from . import nlu, payload as payload_codec, sales, storage, config as cfg
 
 router = Router()
 CART: dict[int, dict[str, int]] = {}
@@ -40,25 +39,30 @@ def conf() -> dict:
     return storage.load_config()
 
 
-def local_stock() -> dict:         # локальная копия (быстро, для карточек)
+def site_base() -> str:
+    c = conf()
+    return (c.get("site_url", "").rstrip("/") or "https://" + cfg.GITHUB_REPO.replace("/", ".github.io/"))
+
+
+def local_stock() -> dict:
     return {p["id"]: p["qty"] for p in storage.products()}
 
 
 def demo_url(pid: str) -> str:
     """URL живого демо (Orbit CRM): конфиг/env главнее каталога."""
-    crm = conf().get("crm_demo_url") or ""
-    if pid == "orbit-crm" and crm.strip():
-        return crm.strip()
+    crm = (conf().get("crm_demo_url") or "").strip()
+    if pid == "orbit-crm" and crm:
+        return crm
     return (storage.product(pid).get("demo") or {}).get("url") or ""
 
 
-# ---------------- тексты витрины ----------------
+# ---------------- тексты витрин ----------------
 
 def catalog_text() -> str:
     lines = ["🛍 <b>Каталог</b> — товары здесь это реальные работающие проекты:\n"]
     for p in storage.products():
-        lines.append(f"{p['emoji']} <b>{esc(p['name'])}</b> · {p['price']} ₽ {esc(p['unit'])}\n{esc(p['tagline'])}")
-    return "\n\n".join(lines)
+        lines.append(f"{p['emoji']} <b>{esc(p['name'])}</b> · {p['price']} ₽ · 📦 {local_stock()[p['id']]}")
+    return "\n".join(lines)
 
 
 def catalog_kb() -> InlineKeyboardMarkup:
@@ -77,15 +81,12 @@ def product_text(pid: str) -> str:
 
 def product_kb(pid: str) -> InlineKeyboardMarkup:
     p = storage.product(pid)
-    c = conf()
-    rows = [[btn("➕ В корзину", f"add:{pid}"), btn(f"💬 Задать вопрос", f"ask:{pid}")]]
-    d = storage.product(pid).get("demo") or {}
-    url = demo_url(pid)
+    d = p.get("demo") or {}
+    rows = [[btn("➕ В корзину", f"add:{pid}"), btn("💬 Задать вопрос", f"ask:{pid}")]]
     if d.get("type") == "showcase":
-        site = c.get("site_url", "").rstrip("/") or "https://" + cfg.GITHUB_REPO.replace("/", ".github.io/")
-        rows.append([btn("🎨 Открыть витрину проекта", url=f"{site}/tts.html")])
-    elif d.get("type") == "url" and url.startswith("http"):
-        rows.append([btn("▶️ Запустить живое демо", url=url)])
+        rows.append([btn("🎨 Открыть витрину проекта", url=f"{site_base()}/tts.html")])
+    elif d.get("type") == "url" and demo_url(pid).startswith("http"):
+        rows.append([btn("▶️ Запустить живое демо", url=demo_url(pid))])
     elif d.get("type") == "url":
         rows.append([btn("▶️ Демо — открывается после настройки", f"demo:{pid}")])
     if pid in ("tgbot", "ai-int"):
@@ -101,7 +102,14 @@ def menu_kb() -> InlineKeyboardMarkup:
     ])
 
 
-# ---------------- команды ----------------
+def fallback_kb() -> InlineKeyboardMarkup:
+    return kb([
+        [btn("🛍 Каталог", "act:catalog"), btn("🚀 Проекты", "act:demos")],
+        [btn("💬 Опишу свою задачу", "act:free")],
+    ])
+
+
+# ---------------- вход ----------------
 
 @router.message(CommandStart())
 async def start(m: Message, state: FSMContext, command: CommandObject | None = None):
@@ -111,14 +119,14 @@ async def start(m: Message, state: FSMContext, command: CommandObject | None = N
         return
     await m.answer(
         f"👋 Привет, <b>{esc(m.from_user.first_name)}</b>!\n\n"
-        "Я магазин <b>AutoShop</b>: внутри продаются реальные работающие проекты — "
-        "CRM, голосовой ИИ-оператор, боты и AI-интеграции.\n\n"
-        "🎯 Опишите вашу задачу в свободной форме — подберу решение и доведу сделку до конца.",
+        "Я магазин <b>AutoShop</b>: внутри — реальные работающие проекты: "
+        "CRM, голосовой ИИ-оператор, боты и AI-интеграция.\n\n"
+        "🎯 Опиши свою задачу в свободной форме — подберу решение и доведу до оплаты.",
         reply_markup=menu_kb())
 
 
 async def handle_payload(m: Message, payload: str, state: FSMContext) -> bool:
-    """Ссылки deep-link: ORD<b64> (корзина сайта), consult-<pid> (диалог по товару)."""
+    """Deep-link: ORD<b64> (корзина с сайта), consult-<pid> (диалог по товару)."""
     got = payload_codec.decode(payload)
     if got is None:
         return False
@@ -130,15 +138,14 @@ async def handle_payload(m: Message, payload: str, state: FSMContext) -> bool:
             return True
         return False
 
-    data = value
-    raw_items = data.get("items") or {}
+    raw_items = (value or {}).get("items") or {}
     valid = {pid: max(1, int(q)) for pid, q in raw_items.items() if storage.product(pid)}
     if not valid:
         return False
     CART[m.from_user.id] = valid
     names = "\n".join(f"• {storage.product(p)['name']} × {q}" for p, q in valid.items())
     total = sum(storage.product(p)["price"] * q for p, q in valid.items())
-    src = "с сайта" if data.get("src") == "site" else "со ссылкой"
+    src = "с сайта" if (value or {}).get("src") == "site" else "со ссылкой"
     await m.answer(
         f"🛒 Принял корзину {src}:\n{names}\n\n<b>Итого: {total} ₽</b>\n\n"
         "📝 <b>Оформление заказа</b>\nКак к вам обращаться?")
@@ -146,16 +153,33 @@ async def handle_payload(m: Message, payload: str, state: FSMContext) -> bool:
     return True
 
 
-async def _start_consult(m: Message, pid: str, state: FSMContext) -> bool:
+async def _start_consult(m: Message, pid: str, state: FSMContext) -> None:
     p = storage.product(pid)
     await state.set_state(St.consult)
     await m.answer(
         f"{p.get('emoji', '')} <b>{esc(p['name'])}</b>\n\n"
-        "Чтобы я посчитал вам точнее, ответьте в одном сообщении:\n"
+        "Чтобы я подобрал решение точно, ответьте одним сообщением:\n"
         "1️⃣ Что за бизнес/процесс?\n"
-        "2️⃣ Что конкретно требует автоматизации?\n"
+        "2️⃣ Что требует автоматизации?\n"
         "3️⃣ Сроки и ориентир по бюджету?")
-    return True
+
+
+def consult_reply(text: str) -> tuple[str, InlineKeyboardMarkup]:
+    """Ответ consultaта: стандартные вопросы → база знаний; бриф → вывод на заказ."""
+    body = sales.answer(text or "")
+    if body:
+        return body, menu_kb()
+    return (
+        "🗂 Задача принята. Смотрите, какие решения под ваш запрос обычно срабатывают:\n\n"
+        "🤖 <b>Telegram-бот под заказ</b> — от 15000 ₽, 7–10 дней\n"
+        "⚙️ <b>AI-автоматизация процессов</b> — от 25000 ₽\n"
+        "🛍 <b>Автономный магазин под ключ</b> — 14900 ₽\n\n"
+        "👉 Выбери направление кнопкой — добавлю в корзину и оформим заказ.",
+        kb([
+            [btn("🤖 Бот под заказ", "prod:tgbot"), btn("⚙️ AI-автоматизация", "prod:ai-int")],
+            [btn("🛍 Магазин под ключ", "prod:autoshop"), btn("🧩 Orbit CRM", "prod:orbit-crm")],
+            [btn("🏠 Меню", "act:menu")],
+        ]))
 
 
 # ---------------- callbacks ----------------
@@ -164,6 +188,7 @@ async def _start_consult(m: Message, pid: str, state: FSMContext) -> bool:
 async def callbacks(cq: CallbackQuery, state: FSMContext):
     d = cq.data
     m = cq.message
+
     def A(text="", alert=False):
         return cq.answer(text or None, show_alert=alert)
 
@@ -185,23 +210,29 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
                "🎙 <b>AI Call Center</b> — голосовой ИИ-оператор для бизнеса.\n"
                "🛍 <b>AutoShop</b> — этот магазин сам является проектом.")
         rows = []
-        if demo_url("orbit-crm"):
+        if demo_url("orbit-crm").startswith("http"):
             rows.append([btn("▶️ Живое демо Orbit CRM", url=demo_url("orbit-crm"))])
         else:
             rows.append([btn("🧩 CRM — демо по запросу", "demo:orbit-crm")])
-        c = conf()
-        site = c.get("site_url", "").rstrip("/") or "https://" + cfg.GITHUB_REPO.replace("/", ".github.io/")
-        rows.append([btn("🎨 Витрина AI Call Center", url=f"{site}/tts.html")])
+        rows.append([btn("🎨 Витрина AI Call Center", url=f"{site_base()}/tts.html")])
         rows.append([btn("🏠 Меню", "act:menu")])
         await m.edit_text(txt, reply_markup=kb(rows))
         return await A()
 
     if d == "act:help":
         await m.edit_text(
-            "Я не просто меню — я продаю высокотехнологичные проекты 😉\n\n"
-            "Пишите текстом любым русским: «хочу бот для записи клиентов», «сколько стоит срм», "
-            "«какие проекты есть» — пойму. Или выбирайте ниже: 👇",
+            "Я продумал вопросы через базу знаний — отвечаю по делу, без запудривания.\n\n"
+            "Спроси: «сколько стоит CRM», «какие сроки», «как проходит оплата», "
+            "или опиши свою задачу — выведу на решение.",
             reply_markup=menu_kb())
+        return await A()
+
+    if d == "act:free":
+        await state.set_state(St.consult)
+        await m.edit_text(
+            "💬 Опиши свою задачу в свободной форме:\n\nбизнес → процесс → что болит.\n"
+            "Найду решение и доведу до оплаты шаг за шагом.",
+            reply_markup=kb([[btn("🏠 Меню", "act:menu")]]))
         return await A()
 
     if d.startswith("prod:"):
@@ -240,15 +271,14 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
         await state.set_state(St.consult)
         p = storage.product(pid)
         await m.answer(f"💬 Тема: <b>{esc(p['name'])}</b>\n\n"
-                       "Задайте вопрос или опишите задачу — отвечу подробно и по делу.")
+                       "Задайте вопрос или опишите задачу — отвечу по делу и доведу до результата.")
         return await A()
 
     if d.startswith("demo:"):
-        return await A(f"Живая ссылка выдаётся после настройки: {storage.product(d[5:])['name']}. "
-                       "Могу ответить на любой вопрос по проекту прямо сейчас.", alert=True)
+        p = storage.product(d[5:])
+        return await A(f"Живая ссылка на «{p['name']}» выдаётся после настройки. Пока могу посмотреть сценарий и ответить на любой вопрос по проекту.", alert=True)
 
     if d.startswith("pay:"):
-        """Оплата: списание остатка + журнал + синк GitHub."""
         o = ORDERS.pop(d[4:], None)
         if not o:
             return await A("Заказ уже обработан", alert=True)
@@ -256,24 +286,23 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
         (name, contact, uid, uname, chat_id) = o["user"]
         for p, q in items.items():
             storage.log_sale(uid, f"{name} / {uname} / {contact}", p, q, "telegram")
-        # локальное списание
-        data = storage._load_local()
+        data = storage.products_doc()
         by_id = {x["id"]: x for x in data["products"]}
         for p, q in items.items():
             if p in by_id:
                 by_id[p]["qty"] = max(0, by_id[p]["qty"] - q)
         data["updated"] = datetime.datetime.now().isoformat(timespec="seconds")
         mode = storage.sync_to_github(data)
-        await A("Оплата подтверждена √")
+        await A("Оплата подтверждена ✅")
         rows = "\n".join(f"• {storage.product(p)['name']} × {q}" for p, q in items.items())
         await m.edit_text(
             f"✅ <b>Оплачено!</b>\n\n{rows}\n\n"
             "🎁 Дальше:\n"
-            "— доступ и материалы отправил/отправлю сюда;\n"
-            "— журнал продажи записан, остаток обновился на сайте.\n\n"
-            "Нужен ещё один проект? 😎",
+            "— доступ к материалам/демо приходит сюда;\n"
+            "— журнал продажи записан, остаток на сайте уже обновился.\n\n"
+            "Нужен ещё проект? 😎",
             reply_markup=kb([[btn("🚀 Проекты", "act:demos")], [btn("🏠 Меню", "act:menu")]]))
-        print(f"[pay] order {d[4:]} → sync: {mode}")
+        print(f"[pay] заказ {d[4:]} · sync: {mode}")
         return
 
     if d.startswith("cancel:"):
@@ -287,16 +316,18 @@ async def callbacks(cq: CallbackQuery, state: FSMContext):
 async def cart_view(m: Message, uid: int):
     items = CART.setdefault(uid, {})
     if not items:
-        return await m.edit_text("🛒 Корзина пуста. Заглянешь в каталог? 👇", reply_markup=kb([[btn("🛍 Каталог", "act:catalog")]]))
+        return await m.edit_text("🛒 Корзина пуста. Заглянешь в каталог? 👇",
+                                 reply_markup=kb([[btn("🛍 Каталог", "act:catalog")], [btn("🏠 Меню", "act:menu")]]))
     total = sum(storage.product(p)["price"] * q for p, q in items.items())
-    lines = "\n".join(f"• {storage.product(p)['name']} × {q} — {storage.product(p)['price'] * q} ₽" for p, q in items.items())
-    rows = [[btn("➖", f"dec:{p}"), btn(f"{storage.product(p)['name'][:16]} · {q}", f"prod:{p}"), btn("➕", f"inc:{p}")] for p, q in items.items()]
+    lines = "\n".join(f"• {esc(storage.product(p)['name'])} × {q} — {storage.product(p)['price'] * q} ₽"
+                      for p, q in items.items())
+    rows = [[btn("➖", f"dec:{p}"), btn(f"{storage.product(p)['name'][:14]}", f"prod:{p}"), btn("➕", f"inc:{p}")]
+            for p, q in items.items()]
     rows.append([btn(f"💳 Оплатить · {total} ₽", "cart:checkout")])
     rows.append([btn("🗑 Очистить", "cart:clr"), btn("🏠 Меню", "act:menu")])
     await m.edit_text(f"🛒 <b>Корзина</b>\n\n{lines}\n\n<b>Итого: {total} ₽</b>", reply_markup=kb(rows))
 
 
-#. Telegram WebApp доступен только HTTPS-страницам — включается после деплоя
 @router.callback_query(F.data == "cart:checkout")
 async def checkout(cq: CallbackQuery, state: FSMContext):
     if not CART.get(cq.from_user.id):
@@ -342,27 +373,13 @@ async def order_contact(m: Message, state: FSMContext):
 
 @router.message(St.consult)
 async def consult(m: Message, state: FSMContext):
-    """Консультант-продавец: отвечает по товарам и доводит до покупки."""
-    products_brief = "\n".join(
-        f"{p['emoji']} {p['name']} — {p['tagline']} Цена {p['price']} ₽ {p['unit']}. Умеет: {'; '.join(p['features'])}"
-        for p in storage.products())
-    system = (
-        "Ты — дружелюбный продавец в Telegram-боте магазина AutoShop. Отвечай по-русски, живо, 3-6 предложений.\n"
-        "Твоя цель: понять задачу клиента, порекомендовать подходящий товар и предложить следующий шаг "
-        "(оформить заказ, задать вопрос, посмотреть демо).\n"
-        "Если вопрос вне каталога — честно скажи и верни к товарам.\n"
-        "Товары магазина:\n" + products_brief +
-        "\nВ конце ответа мягко сделай призыв: «хотите — добавлю в корзину / покажу демо».")
-    body = await ai.chat([{"role": "system", "content": system}, {"role": "user", "content": (m.text or "")[:800]}])
+    """Оффлайн-консультант: любой вопрос/бриф → осмысленный ответ + шаг к сделке."""
+    reply, markup = consult_reply(m.text or "")
     await state.clear()
-    await m.answer(body or "Не смог распознать — покажу каталог 👇", reply_markup=menu_kb())
+    await m.answer(reply, reply_markup=markup)
 
 
 # ---------------- natural language ----------------
-
-GIB = ["Ядро понимания русского подшутило над этим 😅 Но я могу: показать каталог, собрать корзину, "
-       "ответить на любой проектный вопрос. Давай с этого:",
-       "Честно — не расшифровал 🙂 Меню всё равно полезнее: ",]
 
 @router.message()
 async def nlu_router(m: Message, state: FSMContext):
@@ -378,19 +395,21 @@ async def nlu_router(m: Message, state: FSMContext):
         if CART.get(m.from_user.id):
             await state.set_state(St.name)
             return await m.answer("Оформляю заказ 🧾 Как к вам обращаться?")
-        return await m.answer("Корзина пуста — сначала товар 👇", reply_markup=menu_kb())
+        return await m.answer("Корзина пуста — сначала выбери товар 👇", reply_markup=menu_kb())
     if intent == "demos":
         return await m.answer(
-            "🚀 Проекты: CRM, голосовой ИИ-оператор, бот и AI-интеграция. Опишите задачу — покажу нужный.",
-            reply_markup=menu_kb())
+            "🚀 Проекты: CRM, голосовой ИИ-оператор, бот и AI-автоматизация. Опишите задачу — подберу нужный.",
+            reply_markup=fallback_kb())
     if intent == "help":
-        return await m.answer("Пишите по-русски как удобно: «какие есть», «сколько стоит бот», «нужна CRM» — пойму 🙂",
-                              reply_markup=menu_kb())
-    body = await ai.chat([{"role": "system", "content": (
-        "Ты — продавец-консультант в Telegram-боте магазина AutoShop. Отвечай кратко и по делу, "
-        "рекомендуй товары каталога и веди к покупке. Каталог: "
-        + "; ".join(f"{p['name']} ({p['price']}₽)" for p in storage.products()))},
-        {"role": "user", "content": text[:800]}])
-    if body:
-        return await m.answer(body, reply_markup=menu_kb())
-    await m.answer(GIB[len(text) % len(GIB)], reply_markup=menu_kb())
+        return await m.answer(
+            "Пишите по-русски как удобно — пойму. Примеры: «сколько стоит CRM», «есть демо?», "
+            "«нужен бот для записи клиентов» 🙂", reply_markup=menu_kb())
+    reply = sales.answer(text)
+    if reply:
+        return await m.answer(reply, reply_markup=menu_kb())
+    if intent == "gibberish":
+        return await m.answer(
+            sales.smalltalk(text),
+            reply_markup=fallback_kb())
+    # любой другой текст тоже не оставим без продажного ответа
+    return await m.answer(sales.smalltalk(text), reply_markup=fallback_kb())

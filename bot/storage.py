@@ -44,8 +44,12 @@ def save_config(url_key: str, value: str) -> None:
     CONFIG_PATH.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
+def products_doc() -> dict:
+    return _load_local()
+
+
 def products() -> list:
-    return _load_local()["products"]
+    return products_doc()["products"]
 
 
 def product(pid: str) -> dict | None:
@@ -63,7 +67,7 @@ def stock() -> dict:
 def sync_to_github(data: dict | None = None) -> str:
     """Обновление data/products.json в репо сайта (коммит → Pages сам перестроится)."""
     config.DATA_DIR.mkdir(parents=True, exist_ok=True)
-    d = data or _load_local()
+    d = data or products_doc()
     DATA_PATH.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
     if not config.GITHUB_TOKEN:
         return "local"
