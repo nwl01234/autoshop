@@ -1,8 +1,0 @@
-[net] Telegram недоступен (TelegramNetworkError), повтор через 5 c
-[net] Telegram недоступен (TelegramNetworkError), повтор через 10 c
-[net] Telegram недоступен (TelegramNetworkError), повтор через 15 c
-[net] Telegram недоступен (TelegramNetworkError), повтор через 20 c
-[net] Telegram недоступен (TelegramNetworkError), повтор через 25 c
-[net] Telegram недоступен (TelegramNetworkError), повтор через 30 c
-[net] Telegram недоступен (TelegramNetworkError), повтор через 35 c
-[net] Telegram недоступен (TelegramNetworkError), повтор через 40 c
