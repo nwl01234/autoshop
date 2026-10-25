@@ -773,19 +773,23 @@ function checkout(){
   if(!cartCount()) return;
   var items={}; for(var k in CART) items[k]=CART[k];
   var total=cartTotal();
-  /* Telegram Mini App: заказ прямо боту (без браузера) */
+  /* Telegram Mini App: заказ боту. sendData разрешён только при запуске
+     мини-аппа из reply-клавиатуры; из меню-кнопки/inline Telegram его глушит —
+     поэтому подстраховка: deep-link с корзиной в payload срабатывает всегда. */
   if (T && T.sendData){
-    try{ haptic('medium'); T.sendData(JSON.stringify({action:'order', items:items, total:total})); }catch(e){}
+    var sent = false;
+    try{ haptic('medium'); T.sendData(JSON.stringify({action:'order', items:items, total:total})); sent = true; }catch(e){}
+    var b64 = btoa(unescape(encodeURIComponent(JSON.stringify({src:'miniapp', items:items})))).replace(/=+$/,'');
+    var chatUrl = 'https://t.me/'+CONFIG.bot_username+'?start=ORD'+b64;
     CART={}; saveCart();
     var w=$('#cartWrap');
-    w.innerHTML='<div class="empty"><div class="big">Корзина передана в чат ✈️</div>'+
-      '<p>Бот получил заказ и ответит здесь же, в диалоге: адрес, оплата, трек.</p>'+
+    w.innerHTML='<div class="empty"><div class="big">'+(sent?'Корзина ушла в чат ✈️':'Оформляем в чате — один тап')+'</div>'+
+      '<p>'+(sent?'Если бот молчит (магазин открыт из меню-кнопки) — жмите кнопку ниже: заказ придёт в чат с полным составом.':'Бот откроется с вашей корзиной: адрес, оплата, трек — всё в диалоге.')+'</p>'+
       '<div class="cart-actions" style="justify-content:center;margin-top:14px">'+
-      '<button class="btn acc" id="openChat">Перейти в чат с ботом</button>'+
+      '<button class="btn acc" id="openChat">Открыть чат с заказом</button>'+
       '<a class="btn ghost" href="#/catalog">Продолжить покупки</a></div></div>';
     var oc=$('#openChat'); if(oc) oc.onclick=function(){
-      var url='https://t.me/'+CONFIG.bot_username;
-      if(T && T.openTelegramLink) T.openTelegramLink(url); else window.open(url,'_blank');
+      if(T && T.openTelegramLink) T.openTelegramLink(chatUrl); else window.open(chatUrl,'_blank');
     };
     try{ T.MainButton && T.MainButton.hide(); }catch(e){}
     return;

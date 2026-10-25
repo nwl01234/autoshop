@@ -9,7 +9,8 @@ from aiogram import F, Router
 from aiogram.filters import CommandObject, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, WebAppInfo
+from aiogram.types import (CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup,
+                           KeyboardButton, Message, ReplyKeyboardMarkup, WebAppInfo)
 
 from . import nlu, payload as payload_codec, sales, storage
 from . import config as cfg
@@ -43,6 +44,20 @@ def site_base() -> str:
 def webapp_btn() -> InlineKeyboardButton:
     """Кнопка, открывающая магазин ВНУТРИ Telegram (_mini app_), не в браузере."""
     return btn("🏪 Магазин · внутри Telegram", web_app=WebAppInfo(url=site_base() + "/"))
+
+
+def reply_kb() -> ReplyKeyboardMarkup:
+    """Постоянная клавиатура с кнопкой-приложением. Запуск магазина ИМЕННО отсюда
+    разрешает WebApp.sendData(): корзина уходит боту одним тапом из мини-аппа.
+    (Из меню-кнопки и inline-кнопок Telegram sendData не разрешает — там
+    срабатывает fallback с deep-link.)"""
+    return ReplyKeyboardMarkup(
+        keyboard=[[
+            KeyboardButton(text="🛍 Открыть магазин", web_app=WebAppInfo(url=site_base() + "/")),
+            KeyboardButton(text="💬 Консультант"),
+        ]],
+        resize_keyboard=True, is_persistent=True,
+        input_field_placeholder="Спросить консультанта…")
 
 
 def stock_of(pid: str) -> int:
@@ -175,6 +190,9 @@ async def start(m: Message, state: FSMContext, command: CommandObject | None = N
     if payload and await handle_payload(m, payload, state):
         return
     n = sum((CART.get(m.from_user.id) or {}).values())
+    # постоянная клавиатура: запуск магазина отсюда разрешает sendData (корзина
+    # уходит боту прямо из мини-аппа, без единого лишнего шага)
+    await m.answer("Магазин всегда под рукой 👇", reply_markup=reply_kb())
     await m.answer(
         f"✨ <b>LUMÉ</b> — уходовая косметика с честными остатками.\n\n"
         "Сыворотки, SPF и ретинол. Покупайте прямо здесь, в чате — "
