@@ -1,1 +1,5 @@
-{"online": true, "ts": "2026-10-25T14:06:06"}
+{
+  "online": true,
+  "consultant": "ai",
+  "note": "static demo mode"
+}
