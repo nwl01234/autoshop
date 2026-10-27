@@ -1,4 +1,4 @@
-# 🛍 AutoShop Portfolio · [nwl01234.github.io/autoshop](https://nwl01234.github.io/autoshop/)
+# 🛍 AutoShop Portfolio
 
 **Магазин-портфолио, каждый товар которого — работающий проект.**
 Покупатель выбирает решение в каталоге (сайт или Telegram-бот), собирает корзину — и бот сам доводит сделку до оплаты, списывает остаток и записывает продажу. Остатки сайта и бота синхронизированы автоматически: бот коммитит каталог в репозиторий через GitHub API.
@@ -65,7 +65,7 @@ python -m bot.run
 
 ### Деплой сайта (GitHub Pages)
 1. Repo → Settings → Pages → Source: `main` / (root).
-2. Готово: `https://nwl01234.github.io/autoshop/`.
+2. Локальный запуск: инструкция ниже — демо-режим на вашей машине.
 
 ### Права PAT
 `GITHUB_TOKEN` — Personal Access Token с правом `contents: write` на репо — только так бот может коммитить остатки.
